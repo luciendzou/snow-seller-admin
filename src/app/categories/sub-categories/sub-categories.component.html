@@ -1,0 +1,85 @@
+<div class="header-dashboard">
+  <h1 class="">Sous Categories</h1>
+  <nav style="--bs-breadcrumb-divider: url(&#34;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10'%3E%3Cpath d='M2.5 0L1 1.5 3.5 4 1 6.5 2.5 8l4-4-4-4z' fill='currentColor'/%3E%3C/svg%3E&#34;);" aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a routerLink="/" class="text-primary">SnowSeller</a></li>
+      <li class="breadcrumb-item"><a routerLink="/categories" class="text-primary">Catégories</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Sous Categories de <b>{{Onecategorie}}</b></li>
+    </ol>
+  </nav>
+</div>
+
+<div class="card" style="border: none;">
+  <div class="card-body">
+    <div class="row">
+      <div class="col-12 mt-3 d-flex justify-content-around">
+        <p-iconField iconPosition="left">
+          <p-inputIcon styleClass="pi pi-search" />
+          <input type="text" pInputText placeholder="Search" />
+        </p-iconField>
+        <button class="btn btn-secondary mx-2"><i class="ti ti-refresh"></i></button>
+
+        <p-button (onClick)="showDialog()" severity="danger" label="Exporter sous"  icon="pi pi-download" class="me-auto" [style]="{'border-radius': '5px'}"/>
+
+        <p-dialog header="Export Options" [modal]="true" [(visible)]="visible" [style]="{ width: '25rem' }">
+          <div class="menu-dropdown">
+            <a href="#" class="print"><i class="ti ti-printer me-3"></i>Imprimer</a>
+            <hr>
+            <span>Telechargement</span>
+            <a href="#"><i class="ti ti-file-spreadsheet me-3"></i>Excel</a>
+            <a href="#"><i class="ti ti-file-type-pdf me-3"></i>PDF</a>
+          </div>
+        </p-dialog>
+        <button class="btn btn-success" [routerLink]="'create'"><i class="ti ti-plus"></i> Ajouter une sous
+          categorie pour {{Onecategorie}}</button>
+      </div>
+
+      <div class="col-12 mt-5">
+        <p-skeleton width="100%" height="250px" *ngIf="loading" />
+        <p-table [value]="Souscategorie" [tableStyle]="{ 'min-width': '50rem' }" styleClass="p-datatable-striped"
+          [paginator]="true" [rows]="5" [rowsPerPageOptions]="[5, 10, 20]" *ngIf="!loading">
+          <ng-template pTemplate="header" let-columns>
+            <tr>
+              <th pSortableColumn="name_cat">Name <p-sortIcon field="name_cat"></p-sortIcon></th>
+              <th pSortableColumn="statut">Active <p-sortIcon field="statut"></p-sortIcon></th>
+              <th>Actions</th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-Souscategorie let-columns="columns">
+            <tr>
+              <td>{{ Souscategorie.name_cat }}</td>
+              <td>
+                <p-chip styleClass="pl-0 pr-3" *ngIf="Souscategorie.statut=='actived'">
+                  <span
+                    class="bg-primary border-circle w-2rem h-2rem text-white flex align-items-center justify-content-center">
+                    <i class="ti ti-checks text-white"></i>
+                  </span>
+                  <span class="ml-2 font-medium">
+                    Active
+                  </span>
+                </p-chip>
+                <p-chip styleClass="pl-0 pr-3" *ngIf="Souscategorie.statut!='actived'">
+                  <span
+                    class="bg-danger border-circle w-2rem h-2rem text-white flex align-items-center justify-content-center">
+                    <i class="ti ti-exclamation-circle text-white"></i>
+                  </span>
+                  <span class="ml-2 font-medium">
+                    Non Active
+                  </span>
+                </p-chip>
+              </td>
+              <td>
+                <button class="btn btn-primary mx-2"><i class="ti ti-edit" [routerLink]="['update',Souscategorie.souscat_id]"></i></button>
+                <button class="btn btn-danger mx-2" (click)="deteleCategorie(Souscategorie.souscat_id)"><i class="ti ti-trash"></i></button>
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<p-toast key="toast3" />

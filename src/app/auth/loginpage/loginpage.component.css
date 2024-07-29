@@ -1,0 +1,15 @@
+.no-account{
+  text-align: center;
+  margin-top: 5%;
+
+  a{
+    color: rgb(51, 112, 255);
+    cursor: pointer;
+  }
+
+  a:hover{
+    text-decoration: underline;
+    font-weight: 800;
+    color: rgb(10, 80, 244);
+  }
+}

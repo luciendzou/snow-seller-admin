@@ -1,0 +1,97 @@
+:host *{
+  transition: all 500ms ease-in-out;
+}
+
+mat-toolbar{
+  width: 100%;
+  position: relative;
+  z-index: 5;
+}
+
+.content{
+  padding: 24px;
+}
+
+.sidenav-collapsed {
+  background: #ffffff;
+  transition: all .5s ease;
+  z-index: 1;
+  height: 100%;
+  box-shadow: 0.063rem 0 1.005rem 0 #eaebec;
+}
+
+mat-sidenav-content{
+  height: 100vh;
+}
+
+mat-sidenav, mat-sidenav-content{
+  transition: all 500ms ease-in-out;
+}
+
+.sidenav-collapsed .logo-container {
+  display: flex;
+  align-items: center;
+  padding: 0.938rem 0.938rem 0 0.938rem;
+  width: 100%;
+}
+
+.sidenav-collapsed .logo-container.collapse{
+  .logo-text {
+    display: none;
+    visibility: hidden;
+  }
+
+  .btn-closed {
+    display: none;
+    visibility: hidden;
+  }
+}
+
+.sidenav-collapsed .logo-container.collapse.show{
+  .logo-text {
+    display: block;
+    visibility: visible;
+  }
+
+  .btn-closed {
+    display: block;
+    visibility: visible;
+  }
+}
+
+.sidenav-collapsed .logo-container .logo {
+  background: #0294fc;
+  text-align: center;
+  width: 3rem;
+  min-width: 3rem;
+  border-radius: 0.313rem;
+  padding: 0.313rem;
+  font-size: 24px;
+  font-weight: 900;
+  color: #fff;
+  cursor: pointer;
+  border: none;
+}
+
+.sidenav-collapsed .logo-container .logo-text {
+  margin-left: 1.5rem;
+  font-size: 24px;
+  font-weight: 700;
+  color: #000000;
+}
+
+.sidenav-collapsed .logo-container .btn-closed {
+  margin-left: auto;
+  cursor: pointer;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background-color: transparent;
+  border: none;
+}
+
+.sidenav-collapsed .logo-container .btn-closed .fa-times {
+  color: #000000;
+  font-size: 24px;
+}
+

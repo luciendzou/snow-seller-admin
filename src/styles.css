@@ -1,1 +1,53 @@
 /* You can add global styles to this file, and also import other style files */
+@import "primeng/resources/themes/lara-light-blue/theme.css";
+@import "primeng/resources/primeng.css";
+@import "primeicons/primeicons.css";
+@import "primeflex/primeflex.css";
+
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+.header-dashboard {
+  border-top: 5px solid #03b4f5;
+  font-size: 25px !important;
+  padding-top: 0 !important;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2%;
+
+  h1{
+    font-size: 25px;
+  }
+
+  li{
+    font-size: 18px;
+    a{
+      text-decoration: none;
+    }
+  }
+}
+
+
+.menu-dropdown{
+  background-color: white;
+  padding: 1% 2%;
+  border: none;
+  border-radius: 5px;
+  display: block;
+  justify-content: space-between;
+  z-index: 1;
+
+  span{
+    font-size: 12px;
+    font-weight: bold;
+  }
+  a{
+    display: block;
+    width: 100%;
+    padding: 2% 1%;
+    text-decoration: none;
+    font-size: 18px;
+    color: #000;
+  }
+}

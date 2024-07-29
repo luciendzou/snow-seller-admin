@@ -1,0 +1,32 @@
+<a mat-list-item [routerLink]="item().routeLink" (click)="toggleNested()" class="sidenav-nav-link menu-item" [class.indented]="!collapsed()">
+  <i matListItemIcon class="sidenav-link-icon" [class]="item().icon"></i>
+  @if (!collapsed()) {
+  <span matListItemTitle class="sidenav-link-text">
+    {{item().label}}
+  </span>
+  }
+  @if (item().subItems) {
+  <span matListItemMeta>
+    @if (nestedMenuOpen()) {
+    <i class="ti ti-caret-down"></i>
+    }@else{
+    <i class="ti ti-caret-right"></i>
+    }
+  </span>
+  }
+</a>
+@if (item().subItems && nestedMenuOpen()) {
+<div @expandedContractMenu>
+  @for (subItem of item().subItems; track subItem.label) {
+  <a mat-list-item [routerLink]="item().routeLink + '/' +subItem.routeLink" routerLinkActive
+    [routerLinkActiveOptions]="{exact: true}" class="sidenav-nav-link menu-item">
+    <i matListItemIcon class="sidenav-link-icon" [class]="subItem.icon"></i>
+    @if (!collapsed()) {
+    <span matListItemTitle class="sidenav-link-text">
+      {{subItem.label}}
+    </span>
+    }
+  </a>
+  }
+</div>
+}

@@ -1,0 +1,54 @@
+:host *{
+  transition: all 500ms ease-in-out;
+}
+
+
+.sidenav-nav-link {
+  display: flex;
+  align-items: center;
+  height: 3rem;
+  color: #f3f3f3;
+  text-decoration: none;
+  transition: all .3s ease;
+}
+
+.sidenav-nav-link .sidenav-link-icon {
+  font-size: 22px;
+  width: 2rem;
+  min-width: 2rem;
+  margin: 0 0.5rem;
+  text-align: center;
+  color: #7d7d7d;
+}
+
+.sidenav-nav-link .sidenav-link-text {
+  margin-left: 1rem;
+  color: #7d7d7d;
+}
+
+
+.sidenav-nav-link:hover {
+  background-color: #f0f0f0;
+  cursor: pointer;
+  color: #575757;
+}
+
+.menu-item{
+  border-left: 5px solid;
+  border-left-color: #ffffff;
+}
+
+.active {
+  background-color: #eef7fd;
+  border-left: 5px solid;
+  border-left-color: #169bf3;
+
+  .sidenav-link-icon,
+  .sidenav-link-text {
+    color: #000;
+  }
+}
+
+.indented{
+  --mat-list-list-item-leading-icon-start-space:48px;
+}

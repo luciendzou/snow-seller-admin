@@ -1,0 +1,22 @@
+<app-loading-page *ngIf="isLoading"></app-loading-page>
+<mat-sidenav-container *ngIf="!isLoading">
+  <mat-sidenav opened mode="side" [style.width]="sidenavWidth()">
+    <div class="sidenav-collapsed" >
+      <div class="logo-container" [ngbCollapse]="collapsed()">
+        <button class="logo" (click)="collapsed.set(!collapsed())">{{Logo}}</button>
+        <div class="logo-text">{{title}}</div>
+        <button class="btn-closed" (click)="collapsed.set(!collapsed())">
+          <i class="fal fa-times close-icon"></i>
+        </button>
+      </div>
+      <app-sidenav [collapsed]="collapsed()"></app-sidenav>
+    </div>
+  </mat-sidenav>
+  <mat-sidenav-content [style.margin-left]="sidenavWidth()" (click)="collapsed.set(true)">
+
+      <app-menubar></app-menubar>
+    <div class="content">
+      <router-outlet></router-outlet>
+    </div>
+  </mat-sidenav-content>
+</mat-sidenav-container>

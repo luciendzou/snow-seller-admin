@@ -1,0 +1,33 @@
+<form [formGroup]="applyForm" (submit)="LoginProcess()">
+  <div class="d-flex align-items-center justify-content-center pt-3">
+    <div class="surface-card p-5 border-round lg:w-6" style="width: 40% !important;">
+      <div class="text-center mb-5">
+        <img src="../../../assets/logo/favicon.ico" alt="Image" height="80" class="mb-3">
+        <div class="text-900 text-3xl font-medium mb-3">Welcome Back</div>
+      </div>
+
+      <div class="row">
+        <label for="phone" class="block text-900 font-medium mb-2">Telephone</label>
+        <input id="phone" type="tel" placeholder="Numero de telephone" pInputText class="w-full mb-3"
+          formControlName="telephone">
+
+        <label for="password1" class="block text-900 font-medium mb-2">Mot de passe</label>
+        <input id="password1" type="password" placeholder="Password" pInputText class="w-full mb-3"
+          formControlName="password">
+
+        <div class="flex align-items-center justify-content-end mb-6">
+          <a class="font-medium no-underline ml-2 text-blue-500 text-right cursor-pointer">Mot de passe oublié ?</a>
+        </div>
+
+        <button type="submit" class="btn btn-primary py-3 w-full" [disabled]="isSubmitted">
+          <i class="ti ti-user-scan me-5" [hidden]="isSubmitted"></i>
+          <i class="fa fa-spinner fa-spin me-5" [hidden]="!isSubmitted"></i>
+          Authentification</button>
+
+        <p class="no-account">Pas de compte ? <a href="/register">Enregistre toi</a></p>
+      </div>
+    </div>
+  </div>
+</form>
+
+<p-toast key="toast2" />

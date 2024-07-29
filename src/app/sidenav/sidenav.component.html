@@ -1,0 +1,11 @@
+<mat-list>
+  @for (items of dasboard; track items.label) {
+    <app-menu-item [item]="items" [collapsed]="sideNavCollapsed()"></app-menu-item>
+    }
+
+  <p-divider type="dashed" class="mt-2" />
+  <span class="title">Products</span>
+  @for (item of product; track item.label) {
+  <app-menu-item [item]="item" [collapsed]="sideNavCollapsed()"></app-menu-item>
+  }
+</mat-list>
