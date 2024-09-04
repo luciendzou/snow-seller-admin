@@ -1,1 +1,178 @@
-<p>add-commande works!</p>
+<div class="header-dashboard">
+  <h1 class="">Commandes</h1>
+  <nav
+    style="
+      --bs-breadcrumb-divider: url(
+        &#34;data:image/svg + xml,
+        %3Csvgxmlns='http://www.w3.org/2000/svg'width='10'height='10'%3E%3Cpathd='M2.5 0L1 1.5 3.5 4 1 6.5 2.5 8l4-4-4-4z'fill='currentColor'/%3E%3C/svg%3E&#34;
+      );
+    "
+    aria-label="breadcrumb"
+  >
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item">
+        <a routerLink="/" class="text-primary">SnowSeller</a>
+      </li>
+      <li class="breadcrumb-item">
+        <a routerLink="/" class="text-primary">Commandes</a>
+      </li>
+      <li class="breadcrumb-item active" aria-current="page">Ajouter</li>
+    </ol>
+  </nav>
+</div>
+
+<form [formGroup]="applyForm" (submit)="submitApplication()">
+  <div class="card w-100 border-0 bg-white">
+    <div
+      class="card-header py-4 bg-white d-flex justify-content-between item-align-center"
+    >
+      <span class="title"><i class="ti ti-text-plus me-3"></i>General</span>
+    </div>
+    <div class="card-body py-4">
+      <div class="row">
+        <div class="col-6 mb-3">
+          <div class="flex flex-column gap-2">
+            <label for="exampleFormControlInput1" class="form-label"
+              >Nom du produit</label
+            >
+            <input
+              pInputText
+              id="username"
+              class="form-control py-3"
+              aria-describedby="username-help"
+              placeholder="Nom du produit"
+              formControlName="title"
+            />
+          </div>
+        </div>
+        <div class="col-3 mb-3">
+          <div class="flex flex-column gap-2">
+            <label for="exampleFormControlInput1" class="form-label"
+              >Prix du produit</label
+            >
+            <input
+              pInputText
+              id="username"
+              type="number"
+              class="form-control py-3"
+              aria-describedby="username-help"
+              formControlName="price"
+            />
+          </div>
+        </div>
+        <div class="col-3 mb-3">
+          <div class="flex flex-column gap-2">
+            <label for="exampleFormControlInput1" class="form-label"
+              >Quantité du produit</label
+            >
+            <input
+              pInputText
+              id="username"
+              class="form-control py-3"
+              aria-describedby="username-help"
+              placeholder="Nom du produit"
+              formControlName="stock"
+            />
+          </div>
+        </div>
+
+        <div class="col-6 mb-3">
+          <label for="exampleFormControlInput1" class="form-label"
+            >Categorie du produit</label
+          >
+          <select
+            class="form-select form-select-lg mt-2"
+            formControlName="categorie"
+          >
+            <option
+              *ngFor="let item of SousCategories"
+              value="{{ item.souscat_id }}"
+            >
+              {{ item.name_cat }}
+            </option>
+          </select>
+        </div>
+        <div class="col-6 mb-3">
+          <label for="exampleFormControlInput1" class="form-label"
+            >Fournisseurs du produit</label
+          >
+          <select
+            class="form-select form-select-lg mt-2"
+            formControlName="fournisseur"
+          >
+            <option
+              *ngFor="let item of Forunisseurs"
+              value="{{ item.provider_id }}"
+            >
+              {{ item.name_provider }}
+            </option>
+          </select>
+        </div>
+        <div class="col-6 mb-3">
+          <div class="flex flex-column gap-2">
+            <label for="exampleFormControlInput1" class="form-label"
+              >Description</label
+            >
+            <p>
+              <textarea
+                rows="3"
+                cols="30"
+                pInputTextarea
+                formControlName="description"
+                class="w-100"
+              ></textarea>
+            </p>
+          </div>
+        </div>
+        <div class="col-6 mb-3">
+          <div class="flex flex-column gap-2">
+            <label for="exampleFormControlInput1" class="form-label"
+              >Resumé</label
+            >
+            <p>
+              <textarea
+                rows="3"
+                cols="30"
+                pInputTextarea
+                formControlName="summary"
+                class="w-100"
+              ></textarea>
+            </p>
+          </div>
+        </div>
+        <div class="col-12 mb-5">
+          <label class="form-label">Image</label>
+          <div class="content-img">
+            <input
+              type="file"
+              accept=".png, .jpg, .jpeg"
+              (change)="onSelectImage($event)"
+            />
+            <img src="{{ link }}" alt="" class="img-cat" />
+          </div>
+        </div>
+        <div classs="col-12 mb-3">
+          <div class="flex flex-column gap-2">
+            <label for="exampleFormControlInput1" class="form-label"
+              >Ajouter des tags au produit</label
+            >
+            <p-chips
+              formControlName="values"
+              class="w-100"
+              [style]="{ width: '100%' }"
+            />
+          </div>
+        </div>
+
+        <div class="col-12 text-end">
+          <button class="btn btn-primary py-3" type="submit" [disabled]="isLoading">
+            <i class="ti ti-plus" [hidden]="isLoading"></i>
+            <i class="fa fa-spinner fa-spin me-5" [hidden]="!isLoading"></i>Ajout d'un nouveau produit
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
+
+<p-toast key="toast2"></p-toast>

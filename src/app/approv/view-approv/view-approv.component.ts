@@ -30,55 +30,95 @@ import { FournisseursService } from '../../services/fournisseurs.service';
     RouterLinkActive,
     TableModule,
     ToastModule,
-    DialogModule
+    DialogModule,
   ],
   templateUrl: './view-approv.component.html',
   styleUrl: './view-approv.component.css',
   providers: [MessageService],
 })
-export class ViewApprovComponent  implements OnInit{
-
-  fournisseurs!:Fournisseurs[];
+export class ViewApprovComponent implements OnInit {
+  fournisseurs!: Fournisseurs[];
   visible: boolean = false;
 
   showDialog() {
-      this.visible = true;
+    this.visible = true;
   }
 
-  constructor(private messageService: MessageService, private providerService : FournisseursService){}
+  constructor(
+    private messageService: MessageService,
+    private providerService: FournisseursService
+  ) {}
 
   ngOnInit() {
     this.providerService.getAllProviders().subscribe((res: any) => {
       if (!res.error && res) {
-        this.fournisseurs = res.data;
-        this.messageService.add({ key: 'toast2', severity: 'success', summary: res.statut, detail: res.message });
+        if (res.data.length == 0) {
+          this.messageService.add({
+            key: 'toast2',
+            severity: 'error',
+            summary: 'Données vides',
+            detail: 'Désolé, données non recupérées',
+          });
+        } else {
+          this.fournisseurs = res.data;
+          this.messageService.add({
+            key: 'toast2',
+            severity: 'success',
+            summary: res.statut,
+            detail: res.message,
+          });
+        }
       } else {
         if (res.error.statut == 'error') {
-          this.messageService.add({ key: 'toast2', severity: res.error.statut, summary: 'Erreur', detail: res.error.message });
+          this.messageService.add({
+            key: 'toast2',
+            severity: res.error.statut,
+            summary: 'Erreur',
+            detail: res.error.message,
+          });
           return;
         }
         if (res.error.statut == 'errorstatement') {
-          this.messageService.add({ key: 'toast2', severity: res.error.statut, summary: 'Erreur', detail: res.error.message });
+          this.messageService.add({
+            key: 'toast2',
+            severity: res.error.statut,
+            summary: 'Erreur',
+            detail: res.error.message,
+          });
           return;
         }
       }
-
     });
   }
 
-  deleteProvider(id:any){
+  deleteProvider(id: any) {
     this.providerService.deleteCategorie(id).subscribe((res: any) => {
       if (!res.error && res) {
-        this.messageService.add({ key: 'toast3', severity: 'success', summary: 'Succès', detail: res.message });
+        this.messageService.add({
+          key: 'toast3',
+          severity: 'success',
+          summary: 'Succès',
+          detail: res.message,
+        });
 
-        window.location.reload()
+        window.location.reload();
       } else {
         if (res.error.statut == 'error') {
-          this.messageService.add({ key: 'toast3', severity: res.error.statut, summary: 'Erreur', detail: res.error.message });
+          this.messageService.add({
+            key: 'toast3',
+            severity: res.error.statut,
+            summary: 'Erreur',
+            detail: res.error.message,
+          });
           return;
         }
         if (res.error.statut == 'errorstatement') {
-          this.messageService.add({ key: 'toast3', severity: res.error.statut, summary: 'Erreur', detail: res.error.message });
+          this.messageService.add({
+            key: 'toast3',
+            severity: res.error.statut,
+            summary: 'Erreur',
+            detail: res.error.message,
+          });
           return;
         }
       }

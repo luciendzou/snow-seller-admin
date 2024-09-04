@@ -20,16 +20,26 @@ export const ProductsData = [
   {
     routeLink: 'approv-stock',
     icon: 'ti ti-replace',
-    label: 'Commandes'
-  },
-  {
-    routeLink: 'update-stock',
-    icon: 'ti ti-template',
-    label: 'Stock'
+    label: 'Produits'
   },
   {
     routeLink: 'promotions',
     icon: 'ti ti-tags',
     label: 'Promotions'
+  },
+  {
+    routeLink: 'promotions',
+    icon: 'ti ti-directions',
+    label: 'Options'
+  },
+  {
+    routeLink: 'update-stock',
+    icon: 'ti ti-ad-2',
+    label: 'Commandes'
+  },
+  {
+    routeLink: 'update-stock',
+    icon: 'ti ti-template',
+    label: 'Etat de stock'
   },
 ];

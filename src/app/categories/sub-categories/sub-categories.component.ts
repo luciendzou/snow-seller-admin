@@ -63,9 +63,18 @@ export class SubCategoriesComponent implements OnInit {
 
     this.sousCategorieService.getAllAdminSousCategories(this.CategorieId).subscribe((res: any) => {
       if (!res.error && res) {
+        if (res.data.length == 0) {
+          this.messageService.add({
+            key: 'toast3',
+            severity: 'error',
+            summary: 'Données vides',
+            detail: 'Désolé, données non recupérées',
+          });
+          this.loading = false;
+        } else {
         this.Souscategorie = res.data;
         this.messageService.add({ key: 'toast3', severity: 'success', summary: 'Succès', detail: 'Données recupérées avec succès.' });
-        this.loading = false;
+        this.loading = false;}
       } else {
         if (res.error.statut == 'errorstatement') {
           this.messageService.add({ key: 'toast3', severity: res.error.statut, summary: 'Erreur', detail: res.error.message });

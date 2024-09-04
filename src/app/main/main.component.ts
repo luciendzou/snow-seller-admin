@@ -27,7 +27,7 @@ import { AuthService } from '../services/auth.service';
     LoadingPageComponent
   ],
   templateUrl: './main.component.html',
-  styleUrl: './main.component.css',
+  styleUrl: './main.component.css'
 })
 export class MainComponent implements OnInit{
   title: string = '';
@@ -36,18 +36,13 @@ export class MainComponent implements OnInit{
   collapsed = signal(false);
 
   constructor( private router: Router, private authService : AuthService) {
-    afterRender(() => {
-      authService.loadStorage();
-    })
   }
 
   sidenavWidth = computed(() => this.collapsed() ? '85px' : '270px');
 
   ngOnInit(): void {
-    console.log(this.authService.user+'-'+this.authService.token);
-
     if (!this.authService.user && !this.authService.token) {
-      this.router.navigate(["/login"])
+      this.router.navigate(["/login"]);
     }else{
       this.authService.getUsersCount().subscribe(data => {
 

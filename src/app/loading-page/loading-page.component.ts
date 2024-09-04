@@ -15,16 +15,14 @@ export class LoadingPageComponent implements OnInit {
 
 
   constructor( private router: Router, private authService: AuthService){
-    afterRender(() => {
-      authService.loadStorage();
-    })
   }
   ngOnInit(): void {
-    console.log(this.authService.user);
 
-    if (this.authService.user && this.authService.token) {
+    if (this.authService.isLoggedIn()) {
       this.router.navigate(["/dashboard"])
-    }else{
+    }
+
+    if (!this.authService.isLoggedIn()) {
       this.router.navigate(["/login"])
     }
   }

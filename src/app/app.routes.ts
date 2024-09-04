@@ -22,8 +22,8 @@ import { StockComponent } from './stock/stock.component';
 import { Routes } from '@angular/router';
 
 export const routes: Routes = [
-  //{ path: '', redirectTo: 'login', pathMatch: 'full' },
-  { path: '', component: LoadingPageComponent },
+  { path: '', redirectTo: 'loading', pathMatch: 'full' },
+  { path: 'loading', component: LoadingPageComponent },
   { path: 'login', component: LoginpageComponent },
   { path: 'register', component: RegisterpageComponent },
   {
