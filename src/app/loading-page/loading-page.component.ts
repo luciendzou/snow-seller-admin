@@ -18,11 +18,11 @@ export class LoadingPageComponent implements OnInit {
   }
   ngOnInit(): void {
 
-    if (this.authService.isLoggedIn()) {
+    if (this.authService.isLoggedIn) {
       this.router.navigate(["/dashboard"])
     }
 
-    if (!this.authService.isLoggedIn()) {
+    if (!this.authService.isLoggedIn) {
       this.router.navigate(["/login"])
     }
   }

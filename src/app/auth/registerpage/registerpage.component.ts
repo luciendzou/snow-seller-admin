@@ -1,3 +1,4 @@
+import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormGroup, FormControl, ReactiveFormsModule } from '@angular/forms';
 import { MessageService } from 'primeng/api';
@@ -23,7 +24,8 @@ import { StepperModule } from 'primeng/stepper';
     ReactiveFormsModule,
     RippleModule,
     ToastModule,
-    NgbModule
+    NgbModule,
+    CommonModule
   ],
   templateUrl: './registerpage.component.html',
   styleUrl: './registerpage.component.css',
@@ -33,16 +35,73 @@ export class RegisterpageComponent {
   superadmin!: SuperAdmin;
 
   isSubmitted: boolean = false;
+  selectedImage: any;
+  link: any;
 
-  applyForm = new FormGroup({
+  userDate?: SuperAdmin;
+
+  applyForme = new FormGroup({
+    nom: new FormControl(''),
+    prenom: new FormControl(''),
+    email: new FormControl(''),
+    entreprise: new FormControl(''),
     telephone: new FormControl(''),
     password: new FormControl(''),
+    logo: new FormControl(''),
+    nui: new FormControl(''),
+    detail_entreprise: new FormControl(''),
+    sigle: new FormControl(''),
   });
 
-  constructor(private messageService: MessageService, private router: Router, RegisterService : AuthService) {
-    this.superadmin = new SuperAdmin();
+  constructor(private messageService: MessageService, private router: Router, RegisterService: AuthService,) {
+
   }
 
-  RegisterProcess(){}
+  previewInfos() {
 
+    if (this.applyForme.value.nom != '') {
+
+    } else {
+      this.messageService.add({
+        key: 'toast2',
+        severity: 'warn',
+        summary: 'Champ vide',
+        detail: 'Veuillez entrer votre nom',
+      });
+      this.isSubmitted = false;
+      return;
+    }
+  }
+
+  RegisterProcess() {
+    this.messageService.add({
+      key: 'toast2',
+      severity: 'warn',
+      summary: 'Champ vide',
+      detail: 'Veuillez entrer votre nom',
+    });
+    this.isSubmitted = false;
+    if (this.applyForme.value.nom != '') {
+
+    } else {
+      this.messageService.add({
+        key: 'toast2',
+        severity: 'warn',
+        summary: 'Champ vide',
+        detail: 'Veuillez entrer votre nom',
+      });
+      this.isSubmitted = false;
+      return;
+    }
+  }
+
+  onSelectImage(event: any) {
+    this.selectedImage = event.srcElement.files[0];
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      return (this.link = reader.result);
+    };
+    reader.readAsDataURL(this.selectedImage);
+  }
 }

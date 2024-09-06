@@ -15,7 +15,7 @@ import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { SuperAdmin } from '../../domains/super-admin';
-import { AuthService } from '../../services/auth.service';
+import { AuthService, errorMessage } from '../../services/auth.service';
 import { Router } from '@angular/router';
 import { ReactiveFormsModule } from '@angular/forms';
 
@@ -31,7 +31,7 @@ import { ReactiveFormsModule } from '@angular/forms';
     ToastModule,
     NgbModule,
   ],
-  providers: [MessageService],
+  providers: [MessageService, AuthService],
   templateUrl: './loginpage.component.html',
   styleUrl: './loginpage.component.css',
 })
@@ -42,7 +42,7 @@ export class LoginpageComponent {
   logo: string = '';
 
   applyForm = new FormGroup({
-    telephone: new FormControl(''),
+    email: new FormControl(''),
     password: new FormControl(''),
   });
 
@@ -55,23 +55,20 @@ export class LoginpageComponent {
   }
 
   ngOnInit(): void {
-    if (this.authService.isLoggedIn()) {
+    if (this.authService.isLoggedIn) {
       this.router.navigate(['/dashboard']);
     }
   }
 
   LoginProcess() {
     this.isSubmitted = true;
-    if (this.applyForm.value.telephone != '') {
+    if (this.applyForm.value.email != '') {
       if (this.applyForm.value.password != '') {
         this.authService
-          .getUserLogin(
-            this.applyForm.value.telephone ?? '',
+          .loginUser(
+            this.applyForm.value.email ?? '',
             this.applyForm.value.password ?? ''
-          )
-          .subscribe((res: any) => {
-            console.log(res);
-            if (!res.error && res) {
+          ).then((user) => {
               this.messageService.add({
                 key: 'toast2',
                 severity: 'success',
@@ -80,37 +77,17 @@ export class LoginpageComponent {
               });
               this.router.navigate(['/dashboard']);
               this.isSubmitted = false;
-              window.location.reload();
-            } else {
-              if (res.error.statut == 'error') {
-                this.messageService.add({
-                  key: 'toast2',
-                  severity: res.error.statut,
-                  summary: 'Erreur authentification',
-                  detail: 'Utilisateur inconnu !',
-                });
-                this.isSubmitted = false;
-                return;
-              }
-              if (res.error.statut == 'errorstatement') {
-                this.messageService.add({
-                  key: 'toast2',
-                  severity: res.error.statut,
-                  summary: 'Erreur authentification',
-                  detail: res.error.message,
-                });
-                this.isSubmitted = false;
-                return;
-              }
-              this.messageService.add({
-                key: 'toast2',
-                severity: res.error.statut,
-                summary: 'Erreur authentification',
-                detail: res.error.message,
-              });
-              this.isSubmitted = false;
-              return;
-            }
+
+          })
+          .catch((error) => {
+            this.messageService.add({
+              key: 'toast2',
+              severity: 'error',
+              summary: 'Erreur Authentification',
+              detail: errorMessage.convertMessage(error.code),
+            });
+            this.isSubmitted = false;
+            return;
           });
       } else {
         this.messageService.add({
@@ -127,7 +104,7 @@ export class LoginpageComponent {
         key: 'toast2',
         severity: 'warn',
         summary: 'Champ vide',
-        detail: 'Veuillez entrer votre numéro de téléphone',
+        detail: 'Veuillez entrer votre adresse mail',
       });
       this.isSubmitted = false;
       return;

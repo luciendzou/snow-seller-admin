@@ -9,6 +9,16 @@ import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/
 import { ReactiveFormsModule } from '@angular/forms';
 import { BrowserStorageService } from './services/browser-storage.service';
 
+import { AngularFireModule } from "@angular/fire/compat";
+import { AngularFireAuthModule } from "@angular/fire/compat/auth";
+import { AngularFireDatabase } from "@angular/fire/compat/database";
+import { AngularFirestoreModule } from "@angular/fire/compat/firestore";
+import { provideAuth, getAuth } from "@angular/fire/auth";
+import { getStorage, provideStorage } from '@angular/fire/storage';
+import { getFirestore, provideFirestore } from '@angular/fire/firestore';
+import { initializeApp, provideFirebaseApp } from "@angular/fire/app";
+import { enviroment } from '../enviroment/enviroment';
+
 export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection({ eventCoalescing: true }),
@@ -19,6 +29,14 @@ export const appConfig: ApplicationConfig = {
     provideAnimations(),
     provideHttpClient(withFetch()),
     importProvidersFrom(ReactiveFormsModule),
-    provideClientHydration(withHttpTransferCacheOptions({includePostRequests : true}))
+    provideClientHydration(withHttpTransferCacheOptions({ includePostRequests: true })),
+    importProvidersFrom([AngularFireModule.initializeApp(enviroment.firebaseConfig),
+      AngularFireAuthModule,
+      AngularFirestoreModule,
+      AngularFireDatabase]),
+      provideFirebaseApp(()=>initializeApp(enviroment.firebaseConfig)),
+      provideAuth(()=>getAuth()),
+      provideFirestore(() => getFirestore()),
+      provideStorage(() => getStorage()),
   ]
 };
