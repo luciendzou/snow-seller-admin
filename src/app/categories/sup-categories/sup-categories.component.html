@@ -50,38 +50,38 @@
           </ng-template>
           <ng-template pTemplate="body" let-categorie let-columns="columns">
             <tr>
-              <td>{{ categorie.name_cat }}</td>
+              <td>{{ categorie.nameCat }}</td>
               <td>
-                <p-avatar image="{{ categorie.image }}" styleClass="mr-2" size="large" shape="circle" />
+                <p-avatar image="{{ categorie.imgCat }}" styleClass="mr-2" size="large" shape="circle" />
               </td>
-              <td style="width: 20%;">{{ categorie.description_cat }}</td>
+              <td style="width: 20%; font-size: 12px;">{{ categorie.description_cat }}</td>
               <td>
-                <p-chip styleClass="pl-0 pr-3" *ngIf="categorie.statut=='actived'">
+                <p-chip styleClass="pl-0 pr-3" *ngIf="categorie.actived">
                   <span
                     class="bg-primary border-circle w-2rem h-2rem text-white flex align-items-center justify-content-center">
                     <i class="ti ti-checks text-white"></i>
                   </span>
                   <span class="ml-2 font-medium">
-                    Active
+                    En ligne
                   </span>
                 </p-chip>
-                <p-chip styleClass="pl-0 pr-3" *ngIf="categorie.statut!='actived'">
+                <p-chip styleClass="pl-0 pr-3" *ngIf="!categorie.actived">
                   <span
                     class="bg-danger border-circle w-2rem h-2rem text-white flex align-items-center justify-content-center">
                     <i class="ti ti-exclamation-circle text-white"></i>
                   </span>
                   <span class="ml-2 font-medium">
-                    Non Active
+                    Hors ligne
                   </span>
                 </p-chip>
               </td>
               <td>
-                <button class="btn btn-warning mx-2 text-white" [routerLink]="['update',categorie.cat_id]"><i
+                <button class="btn btn-warning mx-2 text-white" [routerLink]="['update',categorie.id]"><i
                     class="ti ti-pencil"></i></button>
-                <button class="btn btn-danger mx-2" (click)="deteleCategorie( categorie.cat_id)"><i
+                <button class="btn btn-danger mx-2" (click)="deteleCategorie(categorie.id)"><i
                     class="ti ti-trash"></i></button>
                 <button class="btn btn-info mx-2 text-white fw-bold"
-                  [routerLink]="['sub-categories', categorie.cat_id]">Sous
+                  [routerLink]="['sub-categories', categorie.id]">Sous
                   Catégories</button>
               </td>
             </tr>

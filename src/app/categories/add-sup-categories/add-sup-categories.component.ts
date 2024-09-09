@@ -14,6 +14,7 @@ import { FileUploadEvent, FileUploadModule } from 'primeng/fileupload';
 import { InputTextareaModule } from 'primeng/inputtextarea';
 import { ToastModule } from 'primeng/toast';
 import { TooltipModule } from 'primeng/tooltip';
+import { BrowserStorageService } from '../../services/browser-storage.service';
 
 @Component({
   selector: 'app-add-sup-categories',
@@ -41,17 +42,16 @@ export class AddSupCategoriesComponent implements OnInit {
   categorie: Categories | undefined;
   selectedImage: any;
   link: any;
-  isloading:boolean=false;
+  isloading: boolean = false;
 
 
   applyForm = new FormGroup({
     categorie: new FormControl(''),
     description: new FormControl(''),
-    statut: new FormControl(''),
   });
 
 
-  constructor(private router: Router, private messageService: MessageService, private AuthService : AuthService, private categorieService : CategoriesService) { }
+  constructor(private LocalStorage: BrowserStorageService, private router: Router, private messageService: MessageService, private authService: AuthService, private categorieService: CategoriesService) { }
 
   ngOnInit() {
 
@@ -60,31 +60,31 @@ export class AddSupCategoriesComponent implements OnInit {
 
 
   submitApplication() {
-    this.isloading=true;
-    this.categorieService.setCategorieToApi(
-      this.applyForm.value.categorie ?? '',
-      this.applyForm.value.description ?? '',
-      this.applyForm.value.statut ?? 'not-active',
-      this.selectedImage
-    ).subscribe((res:any)=>{
-      if (!res.error && res) {
-        this.messageService.add({ key: 'toast2', severity: 'success', summary: 'Succès', detail: 'Catégorie ajoutée avec succès.' });
-        this.isloading=false;
-        this.router.navigate(['categories'])
-      } else {
-        if (res.error.statut == 'error') {
-          this.messageService.add({ key: 'toast2', severity: res.error.statut, summary: 'Erreur', detail: res.error.message });
-          this.isloading=false;
-          return;
-        }
-        if (res.error.statut == 'errorstatement') {
-          this.isloading=false;
-          this.messageService.add({ key: 'toast2', severity: res.error.statut, summary: 'Erreur', detail: res.error.message });
-          return;
-        }
+    this.isloading = true;
+    var link = '';
+    this.authService.saveFileInFirebase('Categories/', this.selectedImage).subscribe((e) => {
+      if (e == 100) {
+        link = this.LocalStorage.get('Linkimage')!;
+        this.categorieService.setCategorieToApi(
+          this.applyForm.value.categorie ?? '',
+          this.applyForm.value.description ?? '',
+          link
+        ).then((e) => {
+          this.isloading = false;
+          this.messageService.add({ key: 'toast2', severity: 'success', summary: 'Succès', detail: 'Catégorie ajoutée avec succès.' });
+          this.isloading = false;
+          this.LocalStorage.remove('Linkimage')!;
+          this.router.navigate(['categories'])
+        }).catch((error) => {
+          this.isloading = false;
+          this.messageService.add({ key: 'toast2', severity: 'error', summary: 'Erreur', detail: error.message });
+        });
       }
-    })
+
+    });
   }
+
+
 
 
   onSelectImage(event: any) {
@@ -94,5 +94,6 @@ export class AddSupCategoriesComponent implements OnInit {
       return this.link = reader.result;
     };
     reader.readAsDataURL(this.selectedImage);
+
   }
 }

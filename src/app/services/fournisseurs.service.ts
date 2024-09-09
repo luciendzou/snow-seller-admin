@@ -11,7 +11,7 @@ import { Router } from '@angular/router';
 export class FournisseursService {
 
   constructor(private http: HttpClient, private authServie: AuthService, private router: Router) {
-    authServie.loadStorage();
+
   }
 
   getAllProviders(): Observable<any> {

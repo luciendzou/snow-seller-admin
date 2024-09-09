@@ -1,120 +1,28 @@
-<form [formGroup]="applyForme" (submit)="RegisterProcess()">
-  <div class="d-flex align-items-center justify-content-center">
-    <div class="surface-card p-5 border-round lg:w-6" style="width: 90% !important;">
+<form [formGroup]="applyForm" (submit)="RegisterProcess()">
+  <div class="d-flex align-items-center justify-content-center pt-3">
+    <div class="surface-card p-5 border-round lg:w-6" style="width: 40% !important;">
       <div class="text-center mb-5">
         <img src="/favicon.ico" alt="Image" height="80" class="mb-3">
         <div class="text-900 text-3xl font-medium mb-3">Bienvenue chez vous</div>
         <p class="no-account">Déjà inscrit ? <a href="/login">Connecte toi</a></p>
       </div>
-      <p-stepper [linear]="true">
-        <p-stepperPanel header="Infomations Personnelles">
-          <ng-template pTemplate="content" let-nextCallback="nextCallback" let-index="index">
-            <div class="flex flex-column h-15rem">
-              <div
-                class="px-5 surface-border border-round surface-ground flex-auto flex justify-content-center align-items-center font-medium">
-                <div class="row px-5">
-                  <div class="col-4">
-                    <label class="block text-900 font-medium mb-2">Votre nom</label>
-                    <input type="text" placeholder="votre nom" pInputText class="w-full mb-3"
-                      formControlName="nom">
-                  </div>
 
-                  <div class="col-4">
-                    <label class="block text-900 font-medium mb-2">Votre prénom</label>
-                    <input type="text" placeholder="Votre prénom" pInputText class="w-full mb-3"
-                      formControlName="prenom">
-                  </div>
+      <div class="row">
+        <label for="email" class="block text-900 font-medium mb-2">Adresse mail</label>
+        <input id="email" type="email" placeholder="Adresse mail" pInputText class="w-full mb-3"
+          formControlName="email">
 
-                  <div class="col-4">
-                    <label class="block text-900 font-medium mb-2">Votre adresse mail</label>
-                    <input type="email" placeholder="Adresse mail" pInputText class="w-full mb-3"
-                      formControlName="email">
-                  </div>
+        <label for="password1" class="block text-900 font-medium mb-2">Mot de passe</label>
+        <input id="password1" type="password" placeholder="Password" pInputText class="w-full mb-3"
+          formControlName="password">
 
-                  <div class="col-4">
-                    <label class="block text-900 font-medium mb-2">Nom de l'entreprise</label>
-                    <input type="text" placeholder="Entreprise" pInputText class="w-full mb-3"
-                      formControlName="entreprise">
-                  </div>
-
-                  <div class="col-4">
-                    <label class="block text-900 font-medium mb-2">Votre numéro de téléphone</label>
-                    <input type="tel" placeholder="Numéro de téléphone" pInputText class="w-full mb-3"
-                      formControlName="telephone">
-                  </div>
-
-                  <div class="col-4">
-                    <label class="block text-900 font-medium mb-2">Mot de passe</label>
-                    <input type="password" placeholder="Password" pInputText class="w-full mb-3"
-                      formControlName="password">
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="flex pt-4 justify-content-end">
-              <p-button label="Next" icon="pi pi-arrow-right" iconPos="right" (onClick)="nextCallback.emit()" />
-            </div>
-          </ng-template>
-        </p-stepperPanel>
-        <p-stepperPanel header="Autres Informations">
-          <ng-template pTemplate="content" let-prevCallback="prevCallback" let-nextCallback="nextCallback"
-            let-index="index">
-            <div class="flex flex-column h-18rem">
-              <div
-                class="px-5 surface-border border-round surface-ground flex-auto flex justify-content-center align-items-center font-medium">
-                <div class="row">
-                  <div class="col-6">
-                    <label class="block text-900 font-medium mb-2">Numéro identifiant unique</label>
-                    <input type="text" placeholder="votre nui" pInputText class="w-full mb-3"
-                      formControlName="nui">
-                  </div>
-
-                  <div class="col-6">
-                    <label class="block text-900 font-medium mb-2">Sigle de l'entreprise</label>
-                    <input type="text" placeholder="sigle ex.MPK" pInputText class="w-full mb-3"
-                      formControlName="sigle">
-                  </div>
-
-                  <div class="col-6">
-                    <label class="form-label">Logo de l'entrepise</label>
-                    <div class="content-img">
-                      <input type="file" accept=".png, .jpg, .jpeg" (change)="onSelectImage($event)" />
-                      <img src="{{ link }}" alt="" class="img-cat" />
-                    </div>
-                  </div>
-
-                  <div class="col-6">
-                    <label for="detail_entreprise" class="block text-900 font-medium mb-2">Description de l'entreprise</label>
-                    <textarea rows="5" cols="300" class="w-full mb-3" pInputTextarea formControlName="detail_entreprise"></textarea>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="flex pt-4 justify-content-between">
-              <p-button label="Back" icon="pi pi-arrow-left" (onClick)="prevCallback.emit()" />
-              <p-button label="Next" icon="pi pi-arrow-right" iconPos="right" (onClick)="nextCallback.emit()" (onClick)="previewInfos()" />
-            </div>
-          </ng-template>
-        </p-stepperPanel>
-        <p-stepperPanel header="Confirmation des Infomations">
-          <ng-template pTemplate="content" let-prevCallback="prevCallback" let-index="index">
-            <div class="flex flex-column h-12rem">
-              <div
-                class="border-2 border-dashed surface-border border-round surface-ground flex-auto flex justify-content-center align-items-center font-medium">
-
-
-              </div>
-            </div>
-            <div class="flex pt-4  justify-content-between">
-              <p-button label="Back" icon="pi pi-arrow-left" (onClick)="prevCallback.emit()"/>
-              <button type="button" class="btn btn-danger py-2 px-3" [disabled]="isSubmitted" (onclick)="RegisterProcess()">
-                <i class="ti ti-user-scan me-5" [hidden]="isSubmitted"></i>
-                <i class="fa fa-spinner fa-spin me-5" [hidden]="!isSubmitted"></i>
-                S'enregistrer</button>
-            </div>
-          </ng-template>
-        </p-stepperPanel>
-      </p-stepper>
+        <button type="submit" class="btn btn-primary py-3 mt-3 w-full" [disabled]="isSubmitted">
+          <i class="ti ti-user-scan me-5" [hidden]="isSubmitted"></i>
+          <i class="fa fa-spinner fa-spin me-5" [hidden]="!isSubmitted"></i>
+          S'enregistrer</button>
+      </div>
     </div>
   </div>
 </form>
+
+<p-toast key="toast2" />

@@ -56,7 +56,12 @@ export class LoginpageComponent {
 
   ngOnInit(): void {
     if (this.authService.isLoggedIn) {
-      this.router.navigate(['/dashboard']);
+
+      if (this.authService.checkEmailVerification) {
+        this.router.navigate(["/verify-email-address"]);
+      }
+
+      this.router.navigate(["/dashboard"]);
     }
   }
 

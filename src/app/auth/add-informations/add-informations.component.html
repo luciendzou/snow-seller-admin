@@ -1,0 +1,85 @@
+<form [formGroup]="applyForm" (submit)="AddingProcess()">
+  <div class="d-flex align-items-center justify-content-center pt-3">
+    <div class="surface-card p-5 border-round lg:w-6" style="width: 70% !important;"><div class="col-12">
+      <a class="btn-link" (click)="NextPage()" *ngIf="second"><i class="ti ti-arrow-narrow-left"></i></a>
+    </div>
+      <div class="text-center mb-5">
+        <img src="/favicon.ico" alt="Image" height="80" class="mb-3">
+        <div class="text-900 text-3xl font-medium mb-5">Enrégistrer vos informations d'entreprise</div>
+      </div>
+      <div class="row px-5 mt-2" *ngIf="first">
+        <div class="col-4">
+          <label class="block text-900 font-medium mb-2">Votre nom</label>
+          <input type="text" placeholder="votre nom" pInputText class="w-full mb-3" formControlName="nom">
+        </div>
+
+        <div class="col-4">
+          <label class="block text-900 font-medium mb-2">Votre prénom</label>
+          <input type="text" placeholder="Votre prénom" pInputText class="w-full mb-3" formControlName="prenom">
+        </div>
+
+        <div class="col-4">
+          <label class="block text-900 font-medium mb-2">Nom de l'entreprise</label>
+          <input type="text" placeholder="Entreprise" pInputText class="w-full mb-3" formControlName="entreprise">
+        </div>
+
+        <div class="col-4">
+          <label class="block text-900 font-medium mb-2">Votre numéro de téléphone</label>
+          <input type="tel" placeholder="Numéro de téléphone" pInputText class="w-full mb-3"
+            formControlName="telephone">
+        </div>
+
+        <div class="col-4">
+          <label class="block text-900 font-medium mb-2">Numéro identifiant unique</label>
+          <input type="text" placeholder="votre nui" pInputText class="w-full mb-3" formControlName="nui">
+        </div>
+
+        <div class="col-12 mt-5 text-end">
+          <button class="py-3 btn btn-primary w-25" type="button" (click)="NextPage()">Suivant</button>
+        </div>
+      </div>
+      <div class="row" *ngIf="second">
+        <div class="col-6">
+          <div class="row">
+            <div class="col-12">
+              <label class="block text-900 font-medium mb-2">Sigle de l'entreprise</label>
+              <input type="text" placeholder="sigle ex.MPK" pInputText class="w-full mb-3" formControlName="sigle">
+            </div>
+            <div class="col-12">
+              <label for="detail_entreprise" class="block text-900 font-medium mb-2">Description de
+                l'entreprise</label>
+              <textarea rows="5" cols="300" class="w-full mb-3" pInputTextarea
+                formControlName="detail_entreprise"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-6">
+          <div class="row">
+            <div class="col-12">
+              <label class="form-label">Logo de l'entrepise</label>
+              <div class="content-img">
+                <input type="file" accept=".png, .jpg, .jpeg" (change)="onSelectImage($event)" />
+              </div>
+            </div>
+            <div class="col-12">
+              <div class="content-img">
+                <img src="{{ link }}" alt="" class="img-cat" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 mt-2 text-end">
+          <button type="submit" class="btn btn-danger py-3 w-25" [disabled]="isSubmitted">
+            <i class="ti ti-device-floppy me-5" [hidden]="isSubmitted"></i>
+            <i class="fa fa-spinner fa-spin me-5" [hidden]="!isSubmitted"></i>
+            Enregistrer</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</form>
+
+<p-toast key="toast2" />

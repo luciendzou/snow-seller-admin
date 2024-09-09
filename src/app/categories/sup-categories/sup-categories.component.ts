@@ -42,7 +42,7 @@ import { CategoriesService } from '../../services/categories.service';
   styleUrl: './sup-categories.component.css',
   providers: [MessageService],
 })
-export class SupCategoriesComponent  implements OnInit {
+export class SupCategoriesComponent implements OnInit {
 
   categorie!: Categories[];
   loading: boolean = true;
@@ -52,55 +52,50 @@ export class SupCategoriesComponent  implements OnInit {
   visible: boolean = false;
 
   showDialog() {
-      this.visible = true;
+    this.visible = true;
   }
 
 
   ngOnInit() {
-    this.categorieService.getAllAdminCategories().subscribe((res: any) => {
-      if (!res.error && res) {
-        if (res.data.length == 0) {
-          this.messageService.add({
-            key: 'toast3',
-            severity: 'error',
-            summary: 'Données vides',
-            detail: 'Désolé, données non recupérées',
-          });
-          this.loading = false;
-        } else {
-        this.categorie = res.data;
-        this.messageService.add({ key: 'toast3', severity: 'success', summary: 'Succès', detail: 'Données recupérées avec succès.' });
-        this.loading = false;}
-      } else {
-        if (res.error.statut == 'errorstatement') {
-          this.messageService.add({ key: 'toast3', severity: res.error.statut, summary: 'Erreur', detail: res.error.message });
-          this.loading = false;
-          return;
-        }
-      }
+    this.getSuperAdminInfos()
+  }
 
+  async getSuperAdminInfos() {
+    await this.categorieService.getAllAdminCategories().then((value) => {
+      if (value.length != 0) {
+        this.loading = false;
+        console.log(value);
+        this.messageService.add({ key: 'toast3', severity: 'success', summary: 'Succès', detail: 'Données recupérées avec succès.' });
+        value.forEach((element:any) => {
+          if (element.idParent == null || element.idParent == '') {
+            this.categorie = [element];
+          }
+        });
+
+      } else {
+        this.messageService.add({
+          key: 'toast3',
+          severity: 'error',
+          summary: 'Données vides',
+          detail: 'Désolé, données non recupérées',
+        });
+        this.loading = false;
+        return;
+      }
     });
+
   }
 
 
-  deteleCategorie(CategorieId: any) {
-    this.categorieService.deleteCategorie(
+  async deteleCategorie(CategorieId: any) {
+   await this.categorieService.deleteCategorie(
       CategorieId
-    ).subscribe((res: any) => {
-      if (!res.error && res) {
+    ).then((res: any) => {
         this.messageService.add({ key: 'toast3', severity: 'success', summary: 'Succès', detail: 'Catégorie supprimée avec succès.' });
-
         window.location.reload()
-      } else {
-        if (res.error.statut == 'error') {
-          this.messageService.add({ key: 'toast3', severity: res.error.statut, summary: 'Erreur', detail: res.error.message });
-          return;
-        }
-        if (res.error.statut == 'errorstatement') {
-          this.messageService.add({ key: 'toast3', severity: res.error.statut, summary: 'Erreur', detail: res.error.message });
-          return;
-        }
-      }
+
+    }).catch((error)=>{
+      this.messageService.add({ key: 'toast3', severity: 'error', summary: 'Erreur', detail: error.message });
     });
   }
 

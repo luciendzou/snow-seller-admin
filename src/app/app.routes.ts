@@ -1,9 +1,11 @@
+import { AddInformationsComponent } from './auth/add-informations/add-informations.component';
 
 import { AddApprovComponent } from './approv/add-approv/add-approv.component';
 import { ApprovComponent } from './approv/approv.component';
 import { ViewApprovComponent } from './approv/view-approv/view-approv.component';
 import { LoginpageComponent } from './auth/loginpage/loginpage.component';
 import { RegisterpageComponent } from './auth/registerpage/registerpage.component';
+import { VerifyEmailComponent } from './auth/verify-email/verify-email.component';
 import { AddSubCategoriesComponent } from './categories/add-sub-categories/add-sub-categories.component';
 import { AddSupCategoriesComponent } from './categories/add-sup-categories/add-sup-categories.component';
 import { CategoriesComponent } from './categories/categories.component';
@@ -26,6 +28,8 @@ export const routes: Routes = [
   { path: 'loading', component: LoadingPageComponent },
   { path: 'login', component: LoginpageComponent },
   { path: 'register', component: RegisterpageComponent },
+  { path: 'verify-email-address', component: VerifyEmailComponent },
+  { path: 'save-data', component: AddInformationsComponent },
   {
     path: '', component: MainComponent,
     children: [

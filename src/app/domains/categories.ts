@@ -1,10 +1,11 @@
 export interface Categories {
-  id?:number,
-  user_id?:number,
-  name_cat?:string,
+  id?:string,
+  iduser?:string,
+  idParent?:string,
+  nameCat?:string,
   description_cat?:string,
-  image?:string,
-  statut?:string
+  imgCat?:string,
+  actived?:boolean,
 }
 
 export interface SousCategories {

@@ -32,8 +32,9 @@ import { Router } from '@angular/router';
 })
 export class MenubarComponent implements OnInit {
   authService = inject(AuthService);
-  UserData!: any[];
+  UserData: any;
   nameUser: string = '';
+  label:any;
 
   constructor(private router: Router, private messageService: MessageService,) { }
 
@@ -44,15 +45,13 @@ export class MenubarComponent implements OnInit {
   }
 
   logout() {
-    this.authService.logout();
+    this.authService.SignOut();
   }
 
-  getSuperAdminInfos(){
-    this.authService.getUsersCount().subscribe(data => {
-      if (data) {
-        this.nameUser = data.data[0].name;
-      }
-    });
+  async getSuperAdminInfos(){
+      this.UserData = await this.authService.getUsersCount(this.authService.uid);
+      this.nameUser = this.UserData[0].email;
+      this.label = this.nameUser.charAt(0)
+   }
 
-  }
 }

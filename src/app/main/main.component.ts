@@ -29,32 +29,36 @@ import { AuthService } from '../services/auth.service';
   templateUrl: './main.component.html',
   styleUrl: './main.component.css'
 })
-export class MainComponent implements OnInit{
+export class MainComponent implements OnInit {
   title: string = '';
   Logo: any;
   isLoading: boolean = true;
   collapsed = signal(false);
+  Admin: any;
 
-  constructor( private router: Router, private authService : AuthService) {
+  constructor(private router: Router, private authService: AuthService) {
   }
 
   sidenavWidth = computed(() => this.collapsed() ? '85px' : '270px');
 
   ngOnInit(): void {
-    if (!this.authService.user && !this.authService.token) {
+    if (!this.authService.uid && !this.authService.isLoggedIn) {
+      this.isLoading=false;
       this.router.navigate(["/login"]);
-    }else{
-      this.authService.getUsersCount().subscribe(data => {
+    } else {
+      if (this.authService.checkEmailVerification) {
+        this.router.navigate(["/verify-email-address"]);
+      }
+      this.isLoading=false;
+      this.getUsers();
 
-        if (data) {
-          this.title = data.data[0].entreprise;
-          this.Logo = data.data[0].logo;
-
-          this.isLoading = false;
-        }
-      });
     }
 
   }
+
+  async getUsers() {
+    this.Admin = await this.authService.getUsersCount(this.authService.uid);
+    this.Logo = this.Admin[0].sigle
+ }
 
 }

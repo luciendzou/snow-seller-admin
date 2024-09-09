@@ -13,7 +13,7 @@ export class BrowserStorageService {
     return this.storage.getItem(key);
   }
 
-  set(key: string, value: string) {
+  set(key: string, value: any) {
     this.storage.setItem(key, value);
   }
 

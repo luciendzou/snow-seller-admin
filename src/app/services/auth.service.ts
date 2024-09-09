@@ -1,7 +1,7 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { afterNextRender, afterRender, inject, Injectable } from '@angular/core';
 import { URL_SERVICE } from '../../config/config';
-import { catchError, from, map, Observable, of } from 'rxjs';
+import { catchError, finalize, from, map, Observable, of } from 'rxjs';
 import { Router } from '@angular/router';
 import { BrowserStorageService } from './browser-storage.service';
 
@@ -11,6 +11,9 @@ import firebase from 'firebase/compat/app';
 import { UserCredential } from '@angular/fire/auth';
 import { Superadmin } from '../domains/superadmin';
 import { AngularFirestore, AngularFirestoreDocument } from '@angular/fire/compat/firestore';
+import { AngularFireStorage } from '@angular/fire/compat/storage';
+import { resolve } from 'path';
+import { FileUpload } from 'primeng/fileupload';
 
 @Injectable({
   providedIn: 'root'
@@ -18,18 +21,17 @@ import { AngularFirestore, AngularFirestoreDocument } from '@angular/fire/compat
 
 export class AuthService {
 
+  uid: any = '';
   user: any;
-  token: any = '';
 
   userData?: Superadmin;
 
-  constructor(public afAuth: AngularFireAuth, public afs: AngularFirestore, private http: HttpClient, private router: Router, private LocalStorage: BrowserStorageService) {
-    this.loadStorage();
-    /* Saving user data in localstorage when
-    logged in and setting up null when logged out */
+  constructor(public afAuth: AngularFireAuth, private storage: AngularFireStorage, public afs: AngularFirestore, private http: HttpClient, private router: Router, private LocalStorage: BrowserStorageService,) {
+
     this.afAuth.authState.subscribe((user) => {
       if (user) {
         this.userData = user as Superadmin;
+        this.uid = user.uid;
         this.LocalStorage.set('user', JSON.stringify(this.userData));
         JSON.parse(this.LocalStorage.get('user')!);
       } else {
@@ -39,30 +41,30 @@ export class AuthService {
     });
   }
 
+  saveFileInFirebase(path: string, fileUpload: FileUpload) {
+    const basePath = '/Admin/' + path + fileUpload.name;
+    const storageRef = this.storage.ref(basePath);
+    const uploadTask = this.storage.upload(basePath, fileUpload);
+    uploadTask.snapshotChanges().pipe(
+      finalize(() => {
+        storageRef.getDownloadURL().subscribe(downloadURL => {
+          const link = downloadURL;
+          this.LocalStorage.set('Linkimage', link)
 
-  loadStorage() {
-
-    if (this.LocalStorage.get("userTokenAPI") && this.LocalStorage.get("userData")) {
-      this.token = this.LocalStorage.get("userTokenAPI");
-      this.user = JSON.parse(this.LocalStorage.get("userData") ?? '');
-    }
-    else {
-      this.token = '';
-      this.user = null;
-    }
+        });
+      })
+    ).subscribe();
+    return uploadTask.percentageChanges();
   }
 
+
   // Sign up with email/password
-  registerUser(userData : Superadmin) {
-    return this.afAuth.createUserWithEmailAndPassword(userData.email!, userData.password!).then((result) => {
-      /* Call the SendVerificaitonMail() function when new user sign
-      up and returns promise */
-      this.SendVerificationMail();
-      this.SetUserData(result.user, userData);
-    })
-      .catch((error) => {
-        window.alert(error.message);
-      });
+  registerUser(email: string, password: string) {
+    return this.afAuth.createUserWithEmailAndPassword(email, password).then((result) => {
+      return result.user?.email;
+    }).catch((error) => {
+      throw error;
+    });
   }
 
   // Send email verfificaiton when new user sign up
@@ -74,32 +76,35 @@ export class AuthService {
       });
   }
 
-  //manyiyong@gmail.com
+  get checkEmailVerification(): boolean {
+    let value = false;
+    this.afAuth.currentUser.then((currentUser) => {
+      if (currentUser?.emailVerified) {
+        value = true;
+        return value;
+      } else {
+        value = false;
+        return value;
+      }
+    });
+    return value === false ? false : true;
+  }
+
+
   loginUser(email: string, password: string): Promise<void> {
     return this.afAuth.signInWithEmailAndPassword(email, password).then((result) => {
       //this.SetUserData(result.user, );
       this.afAuth.authState.subscribe((user) => {
         if (user) {
           return user;
-        }else{
+        } else {
           return null;
         }
       });
     })
       .catch((error) => {
-        throw error;
-
+        throw error.code;
       });
-  }
-
-
-  logout() {
-    this.token = null;
-    this.user = '';
-    this.LocalStorage.remove('userTokenAPI');
-    this.LocalStorage.remove('userData');
-    this.afAuth.signOut();
-    this.router.navigate(['login']);
   }
 
   // Reset Forggot password
@@ -117,32 +122,18 @@ export class AuthService {
   // Returns true when user is looged in and email is verified
   get isLoggedIn(): boolean {
     const user = JSON.parse(this.LocalStorage.get('user')!);
+
     return user !== null && user.emailVerified !== false ? true : false;
-  }
-
-
-  saveLocalStorageResponse(resp: any) {
-    if (resp.getIdToken && resp.id) {
-      this.LocalStorage.set("userTokenAPI", resp.getIdToken);
-      this.LocalStorage.set("userData", JSON.stringify(resp));
-      this.user = resp.email;
-      this.token = resp.getIdToken
-      return true;
-    }
-    return false;
-
   }
 
   /* Setting up user data when sign in with username/password,
   sign up with username/password and sign in with social auth
   provider in Firestore database using AngularFirestore + AngularFirestoreDocument service */
-  SetUserData(user: any, resutl : Superadmin) {
-    const userRef: AngularFirestoreDocument<any> = this.afs.doc(
-      `Admin/${user.uid}`
-    );
+  SetUserData(user: any, resutl: Superadmin) {
+
     const userData: Superadmin = {
-      superadmin_id: user.uid,
-      email: user.email,
+      uid: resutl.uid,
+      email: resutl.email,
       name: resutl.name,
       password: resutl.password,
       logo: resutl.logo,
@@ -152,39 +143,31 @@ export class AuthService {
       nui: resutl.nui,
       sigle: resutl.sigle,
     };
-    return userRef.set(userData, {
-      merge: true,
-    });
+
+    this.afs.collection("Admin").doc(user.uid).set(JSON.parse(JSON.stringify(userData)));
   }
 
   // Sign out
   SignOut() {
     return this.afAuth.signOut().then(() => {
       this.LocalStorage.remove('user');
+      this.LocalStorage.clear();
       this.router.navigate(['login']);
     });
   }
 
 
-  getUsersCount(): Observable<any> {
-    const token = this.LocalStorage.get('userTokenAPI');
-    if (!this.user) {
-      this.router.navigate(['dashboard']);
-    }
-    const id = this.user.users_id!;
-    const telephone = this.user.telephone!;
-    let URL = URL_SERVICE + 'snowseller/admin/' + id + '/' + telephone;
-
-
-    if (!token) {
-      return of(null);
-    }
-    const headers = new HttpHeaders({
-      'Authorization': `Bearer ${token}`,
-    }
-    );
-
-    return this.http.get<any>(URL, { headers });
+  getUsersCount(userId: any,) {
+    return new Promise<any>((resolve) => {
+      this.afs.collection('Admin').valueChanges({ idField: userId })
+        .subscribe(users => {
+          if (users.length !== 0) {
+            resolve(users);
+          } else {
+            this.router.navigate(['save-data']);
+          }
+        });
+    })
 
   }
 
@@ -206,7 +189,9 @@ export namespace errorMessage {
       case 'auth/invalid-credential': {
         return 'Désolé vos identifiants sont incorrects';
       }
-
+      case 'auth/email-already-in-use': {
+        return 'Cet adresse mail est déjà utilisé';
+      }
       default: {
         return 'Login error try again later.';
       }

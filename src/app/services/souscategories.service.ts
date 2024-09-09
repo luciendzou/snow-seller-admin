@@ -12,7 +12,7 @@ export class SouscategoriesService {
 
 
   constructor(private http: HttpClient, private authServie: AuthService, private router: Router) {
-    authServie.loadStorage();
+
   }
 
 

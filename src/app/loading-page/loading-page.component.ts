@@ -1,5 +1,5 @@
 import { afterRender, Component, OnInit } from '@angular/core';
-import {MatProgressBarModule} from '@angular/material/progress-bar';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 
@@ -14,12 +14,15 @@ import { AuthService } from '../services/auth.service';
 export class LoadingPageComponent implements OnInit {
 
 
-  constructor( private router: Router, private authService: AuthService){
+  constructor(private router: Router, private authService: AuthService) {
   }
   ngOnInit(): void {
-
     if (this.authService.isLoggedIn) {
-      this.router.navigate(["/dashboard"])
+      if (this.authService.checkEmailVerification) {
+        this.router.navigate(["/verify-email-address"]);
+      }
+
+      this.router.navigate(["/dashboard"]);
     }
 
     if (!this.authService.isLoggedIn) {

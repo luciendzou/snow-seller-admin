@@ -1,5 +1,5 @@
 export interface Superadmin {
-  superadmin_id?: number,
+  uid?: string,
   name?: string,
   email?: string,
   telephone?: string,
