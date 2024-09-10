@@ -13,6 +13,8 @@ import { Router } from '@angular/router';
 import { SuperAdmin } from '../../domains/super-admin';
 import { CommonModule } from '@angular/common';
 import { BrowserStorageService } from '../../services/browser-storage.service';
+import { finalize } from 'rxjs';
+import { AngularFireStorage } from '@angular/fire/compat/storage';
 
 @Component({
   selector: 'app-add-informations',
@@ -36,6 +38,7 @@ export class AddInformationsComponent {
   isSubmitted: boolean = false;
   selectedImage: any;
   link: any;
+  user:any;
 
   first: boolean = true;
   second: boolean = false;
@@ -52,63 +55,65 @@ export class AddInformationsComponent {
   });
 
   constructor(
+    private storage: AngularFireStorage,
     private messageService: MessageService,
     private router: Router,
     private authService: AuthService,
     private LocalStorage: BrowserStorageService
   ) {
     this.superadmin = new SuperAdmin();
+    this.user = JSON.parse(this.LocalStorage.get('user')!);
+    this.authService.getUsersCount(this.user.uid);
   }
+
 
   AddingProcess() {
     this.isSubmitted = true;
-    var linker = '';
-    this.authService.saveFileInFirebase('Logo/', this.selectedImage).subscribe((e) => {
+    console.log(this.LocalStorage.get('imageLink'));
+    var linker = this.LocalStorage.get('imageLink');
 
-      if (e == 100) {
-        linker = this.LocalStorage.get('Linkimage')!;
-        if (this.applyForm.value.nom != '') {
-          if (this.applyForm.value.prenom != '') {
-            if (this.applyForm.value.entreprise != '') {
-              if (this.applyForm.value.telephone != '') {
-                if (this.applyForm.value.nui != '') {
-                  if (this.applyForm.value.sigle != '') {
-                    if (this.applyForm.value.detail_entreprise != '') {
-                      if (linker != null) {
-                        this.superadmin = {
-                          uid: this.authService.uid,
-                          email: this.LocalStorage.get('email'),
-                          name: this.applyForm.value.nom ?? '' + ' ' + this.applyForm.value.prenom ?? '',
-                          password: this.LocalStorage.get('password'),
-                          logo: linker,
-                          telephone: this.applyForm.value.telephone ?? '',
-                          entreprise: this.applyForm.value.entreprise ?? '',
-                          detail_entreprise: this.applyForm.value.detail_entreprise ?? '',
-                          nui: this.applyForm.value.nui ?? '',
-                          sigle: this.applyForm.value.sigle ?? '',
-                        };
-                        const User = this.LocalStorage.get('user');
-                        this.authService.SetUserData(User, this.superadmin);
-                        this.isSubmitted = false;
-                        this.LocalStorage.remove('Linkimage')!;
+      this.authService.saveFileInFirebase('Logo/', this.selectedImage);
 
-                        this.router.navigate(['dashboard']);
-                      } else {
-                        this.messageService.add({
-                          key: 'toast2',
-                          severity: 'warn',
-                          summary: 'Champ vide',
-                          detail: 'Veuillez entrer votre logo',
-                        });
-                        this.isSubmitted = false;
-                        return;
-                      }
+      while (linker == '') {
+        console.log(this.LocalStorage.get('imageLink'));
+
+        linker = this.LocalStorage.get('imageLink');
+      }
+      console.log(linker);
+      this.LocalStorage.remove('imageLink')
+
+
+      if (this.applyForm.value.nom != '') {
+        if (this.applyForm.value.prenom != '') {
+          if (this.applyForm.value.entreprise != '') {
+            if (this.applyForm.value.telephone != '') {
+              if (this.applyForm.value.nui != '') {
+                if (this.applyForm.value.sigle != '') {
+                  if (this.applyForm.value.detail_entreprise != '') {
+                    if (linker != null) {
+                      this.superadmin = {
+                        uid: this.user.uid,
+                        email: this.user.email,
+                        name: this.applyForm.value.nom ?? '' + this.applyForm.value.prenom ?? '',
+                        password: this.user.password,
+                        logo: linker,
+                        telephone: this.applyForm.value.telephone ?? '',
+                        entreprise: this.applyForm.value.entreprise ?? '',
+                        detail_entreprise: this.applyForm.value.detail_entreprise ?? '',
+                        nui: this.applyForm.value.nui ?? '',
+                        sigle: this.applyForm.value.sigle ?? '',
+                      };
+                      this.authService.SetUserData(this.superadmin);
+                      this.isSubmitted = false;
+                      this.LocalStorage.remove('Linkimage')!;
+
+                      this.router.navigate(['dashboard']);
                     } else {
                       this.messageService.add({
                         key: 'toast2',
                         severity: 'warn',
                         summary: 'Champ vide',
-                        detail: "Veuillez entrer une description de l'entreprise",
+                        detail: 'Veuillez entrer votre logo',
                       });
                       this.isSubmitted = false;
                       return;
@@ -118,7 +123,7 @@ export class AddInformationsComponent {
                       key: 'toast2',
                       severity: 'warn',
                       summary: 'Champ vide',
-                      detail: 'Veuillez entrer votre sigle',
+                      detail: "Veuillez entrer une description de l'entreprise",
                     });
                     this.isSubmitted = false;
                     return;
@@ -128,7 +133,7 @@ export class AddInformationsComponent {
                     key: 'toast2',
                     severity: 'warn',
                     summary: 'Champ vide',
-                    detail: "Veuillez entrer votre Numéro d'identifiant unique",
+                    detail: 'Veuillez entrer votre sigle',
                   });
                   this.isSubmitted = false;
                   return;
@@ -138,7 +143,7 @@ export class AddInformationsComponent {
                   key: 'toast2',
                   severity: 'warn',
                   summary: 'Champ vide',
-                  detail: 'Veuillez entrer votre numéro de telephone',
+                  detail: "Veuillez entrer votre Numéro d'identifiant unique",
                 });
                 this.isSubmitted = false;
                 return;
@@ -148,7 +153,7 @@ export class AddInformationsComponent {
                 key: 'toast2',
                 severity: 'warn',
                 summary: 'Champ vide',
-                detail: "Veuillez entrer votre nom de 'entreprise",
+                detail: 'Veuillez entrer votre numéro de telephone',
               });
               this.isSubmitted = false;
               return;
@@ -158,7 +163,7 @@ export class AddInformationsComponent {
               key: 'toast2',
               severity: 'warn',
               summary: 'Champ vide',
-              detail: 'Veuillez entrer votre prenom',
+              detail: "Veuillez entrer votre nom de 'entreprise",
             });
             this.isSubmitted = false;
             return;
@@ -168,13 +173,21 @@ export class AddInformationsComponent {
             key: 'toast2',
             severity: 'warn',
             summary: 'Champ vide',
-            detail: 'Veuillez entrer votre nom',
+            detail: 'Veuillez entrer votre prenom',
           });
           this.isSubmitted = false;
           return;
         }
+      } else {
+        this.messageService.add({
+          key: 'toast2',
+          severity: 'warn',
+          summary: 'Champ vide',
+          detail: 'Veuillez entrer votre nom',
+        });
+        this.isSubmitted = false;
+        return;
       }
-    });
 
   }
 

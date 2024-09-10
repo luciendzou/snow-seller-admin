@@ -63,13 +63,9 @@ export class AddCommandeComponent implements OnInit {
 
     this.iduser = this.userService.user.users_id;
 
-    this.fourServices.getAllProviders().subscribe((res) => {
-      this.getFournisseursList(res.data);
-    });
 
-    this.catService.getAllByIdAdminSousCategories().subscribe((res) => {
-      this.CategoriesList(res.data);
-    });
+
+
   }
 
   getFournisseursList(data: any) {

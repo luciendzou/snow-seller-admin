@@ -4,38 +4,28 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { catchError, map, Observable, of } from 'rxjs';
 import { AuthService } from './auth.service';
 import { Router } from '@angular/router';
+import { AngularFirestore } from '@angular/fire/compat/firestore';
 
 @Injectable({
   providedIn: 'root'
 })
 export class FournisseursService {
 
-  constructor(private http: HttpClient, private authServie: AuthService, private router: Router) {
-
+  constructor(private http: HttpClient, public afs: AngularFirestore, private authServie: AuthService, private router: Router) {
+    this.authServie.loadUser();
   }
 
-  getAllProviders(): Observable<any> {
-    const token = localStorage.getItem('userTokenAPI');
-    if (!this.authServie.user) {
-      this.router.navigate(['dashboard']);
-    }
-    const id = this.authServie.user.users_id!;
-    let URL = URL_SERVICE + 'snowseller/admin/getAllProvider/' + id;
-    if (!token) {
-      return of(null);
-    }
-    const headers = new HttpHeaders({
-      'Authorization': `Bearer ${token}`,
-    });
+  getAllProviders() {
+    console.log(this.authServie.uid);
 
-    return this.http.get<any>(URL, { headers }).pipe(
-      map((resp: any) => {
-        return resp;
-      }),
-      catchError((err: any) => {
-        return of(err);
-      })
-    );;
+    return new Promise<any>((resolve)=>{
+      this.afs.collection('Marques').valueChanges()
+      .subscribe(marques => {
+        console.log(marques);
+
+          resolve(marques);
+      });
+    })
 
   }
 

@@ -48,7 +48,10 @@ export class SupCategoriesComponent implements OnInit {
   loading: boolean = true;
   searchValue: string | undefined;
 
-  constructor(private messageService: MessageService, private categorieService: CategoriesService, private router: Router) { }
+  constructor(private messageService: MessageService, private categorieService: CategoriesService, private router: Router) {
+
+    this.getSuperAdminInfos()
+   }
   visible: boolean = false;
 
   showDialog() {
@@ -57,20 +60,15 @@ export class SupCategoriesComponent implements OnInit {
 
 
   ngOnInit() {
-    this.getSuperAdminInfos()
   }
 
   async getSuperAdminInfos() {
     await this.categorieService.getAllAdminCategories().then((value) => {
       if (value.length != 0) {
         this.loading = false;
-        console.log(value);
         this.messageService.add({ key: 'toast3', severity: 'success', summary: 'Succès', detail: 'Données recupérées avec succès.' });
-        value.forEach((element:any) => {
-          if (element.idParent == null || element.idParent == '') {
-            this.categorie = [element];
-          }
-        });
+
+        this.categorie = value;
 
       } else {
         this.messageService.add({

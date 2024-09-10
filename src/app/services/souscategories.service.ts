@@ -4,6 +4,8 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { catchError, map, Observable, of } from 'rxjs';
 import { AuthService } from './auth.service';
 import { Router } from '@angular/router';
+import { AngularFirestore } from '@angular/fire/compat/firestore';
+import { Categories } from '../domains/categories';
 
 @Injectable({
   providedIn: 'root'
@@ -11,178 +13,44 @@ import { Router } from '@angular/router';
 export class SouscategoriesService {
 
 
-  constructor(private http: HttpClient, private authServie: AuthService, private router: Router) {
-
+  constructor(public afs: AngularFirestore,private authServie: AuthService, private router: Router) {
+    this.authServie.loadUser();
   }
 
 
-  getAllAdminSousCategories(id:any): Observable<any> {
-    const token = localStorage.getItem('userTokenAPI');
+  getAllAdminSousCategories(id:any) {
 
-    let URL = URL_SERVICE + 'snowseller/admin/getalladminsouscategories/' + id;
-    if (!token) {
-      return of(null);
-    }
-    const headers = new HttpHeaders({
-      'Authorization': `Bearer ${token}`,
-    });
-
-    return this.http.get<any>(URL, { headers }).pipe(
-      map((resp: any) => {
-        return resp;
-      }),
-      catchError((err: any) => {
-        return of(err);
-      })
-    );;
+    return new Promise<any>((resolve)=>{
+      this.afs.collection('Categories',ref => ref.where('idParent', '==', id).where('iduser', '==', this.authServie.uid)).valueChanges()
+      .subscribe(categories => {
+          resolve(categories);
+      });
+    })
 
   }
 
-
-  getAllByIdAdminSousCategories(): Observable<any> {
-    const token = localStorage.getItem('userTokenAPI');
-
-    if (!this.authServie.user) {
-      this.router.navigate(['dashboard']);
-    }
-    const id = this.authServie.user.users_id!;
-    let URL = URL_SERVICE + 'snowseller/admin/getallByIdAdminsouscategories/' + id;
-    if (!token) {
-      return of(null);
-    }
-    const headers = new HttpHeaders({
-      'Authorization': `Bearer ${token}`,
-    });
-
-    return this.http.get<any>(URL, { headers }).pipe(
-      map((resp: any) => {
-        return resp;
-      }),
-      catchError((err: any) => {
-        return of(err);
-      })
-    );;
-
+  getOneCategories(id:any) {
+    return new Promise<any>((resolve)=>{
+      this.afs.collection('Categories').doc(id).valueChanges()
+      .subscribe(categories => {
+          resolve(categories);
+      });
+    })
   }
 
+  setCategorieToApi(categorie: any, description: any, image: any, idParent:any) {
+    const idCat = this.afs.createId();
+    const CategorieData: Categories = {
+      id: idCat,
+      iduser: this.authServie.uid,
+      nameCat: categorie,
+      description_cat: description,
+      imgCat: image,
+      actived: false,
+      idParent: idParent
+    };
 
-  setCategorieToApi(categorie: string, statut: string,  id: any) {
-    const token = localStorage.getItem('userTokenAPI');
-
-    let URL = URL_SERVICE + 'snowseller/admin/addSousCategories ';
-
-    const headers = new HttpHeaders({
-      'Authorization': `Bearer ${token}`,
-    });
-
-
-    var myFormData = new FormData();
-
-    myFormData.append('cat_id', id);
-    myFormData.append('name_cat', categorie);
-    myFormData.append('statut', statut);
-
-
-
-    return this.http.post(URL, myFormData,{headers}).pipe(
-      map((resp: any) => {
-          return resp;
-      }),
-      catchError((err: any) => {
-        return of(err);
-      })
-    );
+    return this.afs.collection("Categories").doc(idCat).set(JSON.parse(JSON.stringify(CategorieData)));
   }
 
-
-  deleteSousCategorie(id:any) {
-    const token = localStorage.getItem('userTokenAPI');
-
-    let URL = URL_SERVICE + 'snowseller/admin/souscategories/delete/'+id;
-
-    const headers = new HttpHeaders({
-      'Authorization': `Bearer ${token}`,
-    });
-
-
-    return this.http.post(URL, {},{headers}).pipe(
-      map((resp: any) => {
-          return resp;
-      }),
-      catchError((err: any) => {
-        return of(err);
-      })
-    );
-  }
-
-
-  getOneCategories(id:any): Observable<any> {
-    const token = localStorage.getItem('userTokenAPI');
-    let URL = URL_SERVICE + 'snowseller/admin/categories/detail/' + id;
-    if (!token) {
-      return of(null);
-    }
-    const headers = new HttpHeaders({
-      'Authorization': `Bearer ${token}`,
-    });
-
-    return this.http.get<any>(URL, { headers }).pipe(
-      map((resp: any) => {
-        return resp;
-      }),
-      catchError((err: any) => {
-        return of(err);
-      })
-    );;
-
-  }
-
-
-  getOneSousCategories(id:any): Observable<any> {
-    const token = localStorage.getItem('userTokenAPI');
-    let URL = URL_SERVICE + 'snowseller/admin/SousCategorie/detail/' + id;
-    if (!token) {
-      return of(null);
-    }
-    const headers = new HttpHeaders({
-      'Authorization': `Bearer ${token}`,
-    });
-
-    return this.http.get<any>(URL, { headers }).pipe(
-      map((resp: any) => {
-        return resp;
-      }),
-      catchError((err: any) => {
-        return of(err);
-      })
-    );;
-
-  }
-
-
-
-  updateSousCategorieToApi(categorie: string, statut: string, id:any) {
-    const token = localStorage.getItem('userTokenAPI');
-
-    let URL = URL_SERVICE + 'snowseller/admin/SousCategorie/update/'+id;
-
-    const headers = new HttpHeaders({
-      'Authorization': `Bearer ${token}`,
-    });
-    var myFormData = new FormData();
-
-    myFormData.append('souscat_id', id);
-    myFormData.append('name_cat', categorie);
-    myFormData.append('statut', statut);
-
-
-    return this.http.post(URL, myFormData,{headers}).pipe(
-      map((resp: any) => {
-          return resp;
-      }),
-      catchError((err: any) => {
-        return of(err);
-      })
-    );
-  }
 }

@@ -17,7 +17,7 @@
           <p-inputIcon styleClass="pi pi-search" />
           <input type="text" pInputText placeholder="Search" />
         </p-iconField>
-        <button class="btn btn-secondary mx-2"><i class="ti ti-refresh"></i></button>
+        <button class="btn btn-secondary mx-2" (click)="getAllSousCategories()"><i class="ti ti-refresh"></i></button>
 
         <p-button (onClick)="showDialog()" severity="danger" label="Exporter sous"  icon="pi pi-download" class="me-auto" [style]="{'border-radius': '5px'}"/>
 
@@ -34,43 +34,52 @@
           categorie pour {{Onecategorie}}</button>
       </div>
 
+
       <div class="col-12 mt-5">
         <p-skeleton width="100%" height="250px" *ngIf="loading" />
         <p-table [value]="Souscategorie" [tableStyle]="{ 'min-width': '50rem' }" styleClass="p-datatable-striped"
           [paginator]="true" [rows]="5" [rowsPerPageOptions]="[5, 10, 20]" *ngIf="!loading">
           <ng-template pTemplate="header" let-columns>
             <tr>
-              <th pSortableColumn="name_cat">Name <p-sortIcon field="name_cat"></p-sortIcon></th>
-              <th pSortableColumn="statut">Active <p-sortIcon field="statut"></p-sortIcon></th>
+              <th pSortableColumn="categorie.name_cat">Name <p-sortIcon field="name_cat"></p-sortIcon></th>
+              <th>Image</th>
+              <th>Description</th>
+              <th pSortableColumn="name">Active <p-sortIcon field="cat_id"></p-sortIcon></th>
               <th>Actions</th>
             </tr>
           </ng-template>
           <ng-template pTemplate="body" let-Souscategorie let-columns="columns">
             <tr>
-              <td>{{ Souscategorie.name_cat }}</td>
+              <td>{{ Souscategorie.nameCat }}</td>
               <td>
-                <p-chip styleClass="pl-0 pr-3" *ngIf="Souscategorie.statut=='actived'">
+                <p-avatar image="{{ Souscategorie.imgCat }}" styleClass="mr-2" size="large" shape="circle" />
+              </td>
+              <td style="width: 20%; font-size: 12px;">{{ Souscategorie.description_cat }}</td>
+              <td>
+                <p-chip styleClass="pl-0 pr-3" *ngIf="Souscategorie.actived">
                   <span
                     class="bg-primary border-circle w-2rem h-2rem text-white flex align-items-center justify-content-center">
                     <i class="ti ti-checks text-white"></i>
                   </span>
                   <span class="ml-2 font-medium">
-                    Active
+                    En ligne
                   </span>
                 </p-chip>
-                <p-chip styleClass="pl-0 pr-3" *ngIf="Souscategorie.statut!='actived'">
+                <p-chip styleClass="pl-0 pr-3" *ngIf="!Souscategorie.actived">
                   <span
                     class="bg-danger border-circle w-2rem h-2rem text-white flex align-items-center justify-content-center">
                     <i class="ti ti-exclamation-circle text-white"></i>
                   </span>
                   <span class="ml-2 font-medium">
-                    Non Active
+                    Hors ligne
                   </span>
                 </p-chip>
               </td>
               <td>
-                <button class="btn btn-primary mx-2"><i class="ti ti-edit" [routerLink]="['update',Souscategorie.souscat_id]"></i></button>
-                <button class="btn btn-danger mx-2" (click)="deteleCategorie(Souscategorie.souscat_id)"><i class="ti ti-trash"></i></button>
+                <button class="btn btn-warning mx-2 text-white" [routerLink]="['update',Souscategorie.id]"><i
+                    class="ti ti-pencil"></i></button>
+                <button class="btn btn-danger mx-2" (click)="deteleCategorie(Souscategorie.id)"><i
+                    class="ti ti-trash"></i></button>
               </td>
             </tr>
           </ng-template>

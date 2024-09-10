@@ -52,16 +52,15 @@ export class LoginpageComponent {
     private authService: AuthService
   ) {
     this.superadmin = new SuperAdmin();
+    authService.loadUser();
+
   }
 
   ngOnInit(): void {
-    if (this.authService.isLoggedIn) {
-
-      if (this.authService.checkEmailVerification) {
-        this.router.navigate(["/verify-email-address"]);
+    if (this.authService.uid!=='') {
+      if (this.authService.isLoggedIn) {
+        this.router.navigate(["/dashboard"]);
       }
-
-      this.router.navigate(["/dashboard"]);
     }
   }
 

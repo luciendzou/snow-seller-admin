@@ -1,10 +1,11 @@
+import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { ChartModule } from 'primeng/chart';
 
 @Component({
   selector: 'app-chart',
   standalone: true,
-  imports: [ChartModule],
+  imports: [ChartModule, CommonModule],
   templateUrl: './chart.component.html',
   styleUrl: './chart.component.css'
 })
@@ -14,11 +15,6 @@ export class ChartComponent  implements OnInit {
   basicOptions: any;
 
   ngOnInit(): void {
-    const documentStyle = getComputedStyle(document.documentElement);
-    const textColor = documentStyle.getPropertyValue('--text-color');
-    const textColorSecondary = documentStyle.getPropertyValue('--text-color-secondary');
-    const surfaceBorder = documentStyle.getPropertyValue('--surface-border');
-
     this.basicData = {
       labels: ['Janv', 'Fev', 'Mars', 'Avril', 'Mai', 'Juin', 'Juil', 'Aout', 'Sept', 'Oct', 'Nov', 'Dec'],
       datasets: [
@@ -36,7 +32,7 @@ export class ChartComponent  implements OnInit {
       plugins: {
         legend: {
           labels: {
-            color: textColor
+            color: 'transparent'
           }
         }
       },
@@ -44,19 +40,19 @@ export class ChartComponent  implements OnInit {
         y: {
           beginAtZero: true,
           ticks: {
-            color: textColorSecondary
+            color: 'transparent'
           },
           grid: {
-            color: surfaceBorder,
+            color: '#004',
             drawBorder: false
           }
         },
         x: {
           ticks: {
-            color: textColorSecondary
+            color: '#00f'
           },
           grid: {
-            color: surfaceBorder,
+            color: 'transparent',
             drawBorder: false
           }
         }

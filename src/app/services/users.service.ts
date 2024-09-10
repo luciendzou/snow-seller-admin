@@ -10,7 +10,7 @@ import { URL_SERVICE } from '../../config/config';
 })
 export class UsersService {
   constructor(private http: HttpClient, private authServie: AuthService, private router : Router) {
-    authServie.loadStorage();
+    this.authServie.loadUser();
   }
 
 

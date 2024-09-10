@@ -7,12 +7,9 @@ import { BrowserStorageService } from './browser-storage.service';
 
 
 import { AngularFireAuth } from '@angular/fire/compat/auth';
-import firebase from 'firebase/compat/app';
-import { UserCredential } from '@angular/fire/auth';
 import { Superadmin } from '../domains/superadmin';
-import { AngularFirestore, AngularFirestoreDocument } from '@angular/fire/compat/firestore';
+import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { AngularFireStorage } from '@angular/fire/compat/storage';
-import { resolve } from 'path';
 import { FileUpload } from 'primeng/fileupload';
 
 @Injectable({
@@ -24,13 +21,16 @@ export class AuthService {
   uid: any = '';
   user: any;
 
-  userData?: Superadmin;
+  userData?: any;
 
-  constructor(public afAuth: AngularFireAuth, private storage: AngularFireStorage, public afs: AngularFirestore, private http: HttpClient, private router: Router, private LocalStorage: BrowserStorageService,) {
+  constructor(public afAuth: AngularFireAuth, private storage: AngularFireStorage, public afs: AngularFirestore, private http: HttpClient, private router: Router, private LocalStorage: BrowserStorageService) {
+    this.loadUser();
+  }
 
+  loadUser(){
     this.afAuth.authState.subscribe((user) => {
       if (user) {
-        this.userData = user as Superadmin;
+        this.userData = user;
         this.uid = user.uid;
         this.LocalStorage.set('user', JSON.stringify(this.userData));
         JSON.parse(this.LocalStorage.get('user')!);
@@ -48,9 +48,8 @@ export class AuthService {
     uploadTask.snapshotChanges().pipe(
       finalize(() => {
         storageRef.getDownloadURL().subscribe(downloadURL => {
-          const link = downloadURL;
-          this.LocalStorage.set('Linkimage', link)
-
+        const link = downloadURL;
+        this.LocalStorage.set('imageLink', link);
         });
       })
     ).subscribe();
@@ -129,7 +128,7 @@ export class AuthService {
   /* Setting up user data when sign in with username/password,
   sign up with username/password and sign in with social auth
   provider in Firestore database using AngularFirestore + AngularFirestoreDocument service */
-  SetUserData(user: any, resutl: Superadmin) {
+  SetUserData(resutl: Superadmin) {
 
     const userData: Superadmin = {
       uid: resutl.uid,
@@ -144,7 +143,7 @@ export class AuthService {
       sigle: resutl.sigle,
     };
 
-    this.afs.collection("Admin").doc(user.uid).set(JSON.parse(JSON.stringify(userData)));
+    this.afs.collection("Admin").doc(resutl.uid).set(JSON.parse(JSON.stringify(userData)));
   }
 
   // Sign out
@@ -158,13 +157,17 @@ export class AuthService {
 
 
   getUsersCount(userId: any,) {
+    console.log(userId);
+
     return new Promise<any>((resolve) => {
-      this.afs.collection('Admin').valueChanges({ idField: userId })
+      this.afs.collection('Admin',ref => ref.where('uid', '==', userId)).valueChanges()
         .subscribe(users => {
-          if (users.length !== 0) {
+          console.log(users);
+          if (users.length > 0) {
             resolve(users);
-          } else {
-            this.router.navigate(['save-data']);
+            this.router.navigate(['dashboard']);
+          }else{
+            this.router.navigate(['verify-email-address']);
           }
         });
     })

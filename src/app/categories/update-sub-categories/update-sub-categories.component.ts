@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { ReactiveFormsModule, FormGroup, FormControl } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { MessageService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
@@ -13,6 +13,9 @@ import { InputTextareaModule } from 'primeng/inputtextarea';
 import { ToastModule } from 'primeng/toast';
 import { TooltipModule } from 'primeng/tooltip';
 import { SouscategoriesService } from '../../services/souscategories.service';
+import { CategoriesService } from '../../services/categories.service';
+import { AngularFireStorage } from '@angular/fire/compat/storage';
+import { finalize } from 'rxjs';
 
 @Component({
   selector: 'app-update-sub-categories',
@@ -28,7 +31,8 @@ import { SouscategoriesService } from '../../services/souscategories.service';
     ButtonModule,
     InputTextareaModule,
     ReactiveFormsModule,
-    ToastModule
+    ToastModule,
+    RouterLink
   ],
   templateUrl: './update-sub-categories.component.html',
   styleUrl: './update-sub-categories.component.css',
@@ -39,64 +43,113 @@ export class UpdateSubCategoriesComponent {
   value: string | undefined;
   CategorieId!: number;
   SupCategorieId: any;
+  selectedImage: any;
+  link: any;
+  categories!: string;
 
   isLoading : boolean = false;
   applyForm = new FormGroup({
     categorie: new FormControl(''),
+    description: new FormControl(''),
     statut: new FormControl(''),
   });
 
-  constructor(private router: Router, private messageService: MessageService, private sousCategorieService : SouscategoriesService) {
-    this.CategorieId = Number(this.route.snapshot.params['id']);
+  constructor(
+    private router: Router,
+    private messageService: MessageService,
+    private storage: AngularFireStorage,
+    private sousCategorieService : SouscategoriesService,
+    private categorieService : CategoriesService) {
+    this.CategorieId = this.route.snapshot.params['id'];
   }
 
   ngOnInit() {
-    this.sousCategorieService.getOneSousCategories(this.CategorieId).subscribe((res: any) => {
-
-      if (!res.error && res) {
-
-        this.applyForm.setValue({
-          categorie: res.data[0].name_cat,
-          statut: res.data[0].statut,
-        })
-
-        this.SupCategorieId = res.data[0].cat_id
-      }
-
+    this.sousCategorieService.getOneCategories(this.CategorieId).then((res: any) => {
+      this.link = res.imgCat;
+      this.categories = res.nameCat;
+      this.SupCategorieId = res.idParent;
+      this.applyForm.setValue({
+        categorie: res.nameCat,
+        description: res.description_cat,
+        statut: res.actived
+      })
     })
+
   }
 
   submitApplication() {
     this.isLoading = true;
     if (this.applyForm.value.categorie == '') { }
+    if (this.applyForm.value.description != '') { }
     if (this.applyForm.value.statut != '') { }
 
-    this.sousCategorieService.updateSousCategorieToApi(
-      this.applyForm.value.categorie ?? '',
-      this.applyForm.value.statut ?? 'not-active',
-      this.CategorieId
-    ).subscribe((res: any) => {
-      if (!res.error && res) {
+    var linker = '';
+
+    if (this.selectedImage !== undefined) {
+      console.log('Started here');
+      const basePath = '/Admin/Categories/' + this.selectedImage.name;
+      const storageRef = this.storage.ref(basePath);
+      const uploadTask = this.storage.upload(basePath, this.selectedImage);
+      console.log('Good');
+      uploadTask.snapshotChanges().pipe(
+        finalize(() => {
+          console.log('Good 1');
+          storageRef.getDownloadURL().subscribe((downloadURL: any) => {
+            linker = downloadURL;
+            console.log(linker);
+            this.categorieService.updateCategorieToApi(
+              this.applyForm.value.categorie ?? '',
+              this.applyForm.value.description ?? '',
+              JSON.parse(this.applyForm.value.statut ?? 'false'),
+              linker,
+              this.CategorieId
+            ).then((res: any) => {
+              console.log('Good 2');
+              this.messageService.add({ key: 'toast2', severity: 'success', summary: 'Succès', detail: 'Catégorie modifiée avec succès.' });
+              this.isLoading = false;
+              this.router.navigate(['categories'])
+              return;
+            }).catch((error) => {
+              this.messageService.add({ key: 'toast2', severity: 'error', summary: 'Erreur', detail: error.message });
+              this.isLoading = false;
+              return;
+            });
+          })
+        }));
+    } else {
+      console.log('Started on this');
+      this.categorieService.updateCategorieToApi(
+        this.applyForm.value.categorie ?? '',
+        this.applyForm.value.description ?? '',
+        JSON.parse(this.applyForm.value.statut ?? 'false'),
+        this.link,
+        this.CategorieId
+      ).then((res: any) => {
+        console.log('Okay');
         this.messageService.add({ key: 'toast2', severity: 'success', summary: 'Succès', detail: 'Catégorie modifiée avec succès.' });
-        this.router.navigate(['categories/sub-categories/'+this.SupCategorieId])
         this.isLoading = false;
-      } else {
-        if (res.error.statut == 'error') {
-          this.messageService.add({ key: 'toast2', severity: res.error.statut, summary: 'Erreur', detail: res.error.message });
-          this.isLoading = false;
-          return;
-        }
-        if (res.error.statut == 'errorstatement') {
-          this.messageService.add({ key: 'toast2', severity: res.error.statut, summary: 'Erreur', detail: res.error.message });
-          this.isLoading = false;
-          return;
-        }
-      }
-    });
+        this.router.navigate(['categories'])
+      }).catch((error) => {
+        this.messageService.add({ key: 'toast2', severity: 'error', summary: 'Erreur', detail: error.message });
+        this.isLoading = false;
+        return;
+      });
+    }
+
+
   }
 
 
   BactToCategories(){
     this.router.navigate(['categories/sub-categories/'+this.SupCategorieId])
+  }
+
+  onSelectImage(event: any) {
+    this.selectedImage = event.srcElement.files[0];
+
+    const reader = new FileReader(); reader.onload = e => {
+      return this.link = reader.result;
+    };
+    reader.readAsDataURL(this.selectedImage);
   }
 }

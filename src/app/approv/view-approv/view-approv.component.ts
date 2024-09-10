@@ -13,6 +13,7 @@ import { TableModule } from 'primeng/table';
 import { ToastModule } from 'primeng/toast';
 import { Fournisseurs } from '../../domains/fournisseurs';
 import { FournisseursService } from '../../services/fournisseurs.service';
+import { AvatarModule } from 'primeng/avatar';
 
 @Component({
   selector: 'app-view-approv',
@@ -31,6 +32,7 @@ import { FournisseursService } from '../../services/fournisseurs.service';
     TableModule,
     ToastModule,
     DialogModule,
+    AvatarModule
   ],
   templateUrl: './view-approv.component.html',
   styleUrl: './view-approv.component.css',
@@ -39,6 +41,7 @@ import { FournisseursService } from '../../services/fournisseurs.service';
 export class ViewApprovComponent implements OnInit {
   fournisseurs!: Fournisseurs[];
   visible: boolean = false;
+  loading: boolean = true;
 
   showDialog() {
     this.visible = true;
@@ -47,46 +50,30 @@ export class ViewApprovComponent implements OnInit {
   constructor(
     private messageService: MessageService,
     private providerService: FournisseursService
-  ) {}
+  ) {
+    this. getAllMarques();
+  }
 
   ngOnInit() {
-    this.providerService.getAllProviders().subscribe((res: any) => {
-      if (!res.error && res) {
-        if (res.data.length == 0) {
-          this.messageService.add({
-            key: 'toast2',
-            severity: 'error',
-            summary: 'Données vides',
-            detail: 'Désolé, données non recupérées',
-          });
-        } else {
-          this.fournisseurs = res.data;
-          this.messageService.add({
-            key: 'toast2',
-            severity: 'success',
-            summary: res.statut,
-            detail: res.message,
-          });
-        }
+
+  }
+
+  getAllMarques(){
+    this.providerService.getAllProviders().then((value) => {
+
+      if (value.length != 0) {
+        this.loading = false;
+        this.messageService.add({ key: 'toast3', severity: 'success', summary: 'Succès', detail: 'Données recupérées avec succès.' });
+        this.fournisseurs = value;
       } else {
-        if (res.error.statut == 'error') {
-          this.messageService.add({
-            key: 'toast2',
-            severity: res.error.statut,
-            summary: 'Erreur',
-            detail: res.error.message,
-          });
-          return;
-        }
-        if (res.error.statut == 'errorstatement') {
-          this.messageService.add({
-            key: 'toast2',
-            severity: res.error.statut,
-            summary: 'Erreur',
-            detail: res.error.message,
-          });
-          return;
-        }
+        this.messageService.add({
+          key: 'toast3',
+          severity: 'error',
+          summary: 'Données vides',
+          detail: 'Désolé, données non recupérées',
+        });
+        this.loading = false;
+        return;
       }
     });
   }

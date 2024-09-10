@@ -13,6 +13,10 @@ import { InputTextModule } from 'primeng/inputtext';
 import { InputTextareaModule } from 'primeng/inputtextarea';
 import { ToastModule } from 'primeng/toast';
 import { TooltipModule } from 'primeng/tooltip';
+import { BrowserStorageService } from '../../services/browser-storage.service';
+import { error } from 'console';
+import { finalize } from 'rxjs';
+import { AngularFireStorage } from '@angular/fire/compat/storage';
 
 @Component({
   selector: 'app-update-sup-categories',
@@ -39,8 +43,8 @@ export class UpdateSupCategoriesComponent implements OnInit {
   selectedImage: any;
   link: any;
   CategorieId!: number;
-  categories!:string;
-  isLoading:boolean=false;
+  categories!: string;
+  isLoading: boolean = false;
 
   applyForm = new FormGroup({
     categorie: new FormControl(''),
@@ -49,29 +53,25 @@ export class UpdateSupCategoriesComponent implements OnInit {
   });
 
 
-  constructor(private router: Router, private messageService: MessageService, private categorieService :CategoriesService, private AuthService : AuthService) {
-    this.CategorieId = Number(this.route.snapshot.params['id']);
+  constructor(private storage: AngularFireStorage, private router: Router, private messageService: MessageService, private categorieService: CategoriesService, private authService: AuthService, private LocalStorage: BrowserStorageService,) {
+    this.CategorieId = this.route.snapshot.params['id'];
   }
 
   ngOnInit() {
-    this.categorieService.getOneCategories(this.CategorieId).subscribe((res: any) => {
 
-      if (!res.error && res) {
-        this.link = res.data[0].image;
-        this.categories = res.data[0].name_cat;
-
-        this.applyForm.setValue({
-          categorie: res.data[0].name_cat,
-          description: res.data[0].description_cat,
-          statut: res.data[0].statut
-        })
-      }
-
+    this.categorieService.getOneCategories(this.CategorieId).then((res: any) => {
+      this.link = res.imgCat;
+      this.categories = res.nameCat;
+      this.applyForm.setValue({
+        categorie: res.nameCat,
+        description: res.description_cat,
+        statut: res.actived
+      })
     })
 
   }
 
-  BactToCategories(){
+  BactToCategories() {
     this.router.navigate(['categories'])
   }
 
@@ -83,31 +83,58 @@ export class UpdateSupCategoriesComponent implements OnInit {
     if (this.applyForm.value.description != '') { }
     if (this.applyForm.value.statut != '') { }
 
-    this.categorieService.updateCategorieToApi(
-      this.applyForm.value.categorie ?? '',
-      this.applyForm.value.description ?? '',
-      this.applyForm.value.statut ?? 'not-active',
-      this.selectedImage,
-      this.link,
-      this.CategorieId
-    ).subscribe((res: any) => {
-      if (!res.error && res) {
+    var linker = '';
+
+    if (this.selectedImage !== undefined) {
+      console.log('Started here');
+      const basePath = '/Admin/Categories/' + this.selectedImage.name;
+      const storageRef = this.storage.ref(basePath);
+      const uploadTask = this.storage.upload(basePath, this.selectedImage);
+      console.log('Good');
+      uploadTask.snapshotChanges().pipe(
+        finalize(() => {
+          console.log('Good 1');
+          storageRef.getDownloadURL().subscribe((downloadURL: any) => {
+            linker = downloadURL;
+            console.log(linker);
+            this.categorieService.updateCategorieToApi(
+              this.applyForm.value.categorie ?? '',
+              this.applyForm.value.description ?? '',
+              JSON.parse(this.applyForm.value.statut ?? 'false'),
+              linker,
+              this.CategorieId
+            ).then((res: any) => {
+              console.log('Good 2');
+              this.messageService.add({ key: 'toast2', severity: 'success', summary: 'Succès', detail: 'Catégorie modifiée avec succès.' });
+              this.isLoading = false;
+              this.router.navigate(['categories'])
+              return;
+            }).catch((error) => {
+              this.messageService.add({ key: 'toast2', severity: 'error', summary: 'Erreur', detail: error.message });
+              this.isLoading = false;
+              return;
+            });
+          })
+        }));
+    } else {
+      console.log('Started on this');
+      this.categorieService.updateCategorieToApi(
+        this.applyForm.value.categorie ?? '',
+        this.applyForm.value.description ?? '',
+        JSON.parse(this.applyForm.value.statut ?? 'false'),
+        this.link,
+        this.CategorieId
+      ).then((res: any) => {
+        console.log('Okay');
         this.messageService.add({ key: 'toast2', severity: 'success', summary: 'Succès', detail: 'Catégorie modifiée avec succès.' });
         this.isLoading = false;
         this.router.navigate(['categories'])
-      } else {
-        if (res.error.statut == 'error') {
-          this.messageService.add({ key: 'toast2', severity: res.error.statut, summary: 'Erreur', detail: res.error.message });
-          this.isLoading = false;
-          return;
-        }
-        if (res.error.statut == 'errorstatement') {
-          this.messageService.add({ key: 'toast2', severity: res.error.statut, summary: 'Erreur', detail: res.error.message });
-          this.isLoading = false;
-          return;
-        }
-      }
-    });
+      }).catch((error) => {
+        this.messageService.add({ key: 'toast2', severity: 'error', summary: 'Erreur', detail: error.message });
+        this.isLoading = false;
+        return;
+      });
+    }
 
   }
 

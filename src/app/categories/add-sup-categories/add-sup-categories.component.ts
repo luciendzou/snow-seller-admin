@@ -3,7 +3,7 @@ import { AuthService } from '../../services/auth.service';
 import { FormGroup, FormControl, ReactiveFormsModule } from '@angular/forms';
 import { MessageService } from 'primeng/api';
 import { Categories } from '../../domains/categories';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { CategoriesService } from '../../services/categories.service';
 import { CommonModule } from '@angular/common';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
@@ -15,6 +15,8 @@ import { InputTextareaModule } from 'primeng/inputtextarea';
 import { ToastModule } from 'primeng/toast';
 import { TooltipModule } from 'primeng/tooltip';
 import { BrowserStorageService } from '../../services/browser-storage.service';
+import { finalize } from 'rxjs';
+import { AngularFireStorage } from '@angular/fire/compat/storage';
 
 @Component({
   selector: 'app-add-sup-categories',
@@ -30,7 +32,8 @@ import { BrowserStorageService } from '../../services/browser-storage.service';
     InputTextareaModule,
     ReactiveFormsModule,
     ToastModule,
-    NgbModule
+    NgbModule,
+    RouterLink
   ],
   templateUrl: './add-sup-categories.component.html',
   styleUrl: './add-sup-categories.component.css',
@@ -51,7 +54,7 @@ export class AddSupCategoriesComponent implements OnInit {
   });
 
 
-  constructor(private LocalStorage: BrowserStorageService, private router: Router, private messageService: MessageService, private authService: AuthService, private categorieService: CategoriesService) { }
+  constructor( private storage: AngularFireStorage, private LocalStorage: BrowserStorageService, private router: Router, private messageService: MessageService, private authService: AuthService, private categorieService: CategoriesService) { }
 
   ngOnInit() {
 
@@ -62,10 +65,15 @@ export class AddSupCategoriesComponent implements OnInit {
   submitApplication() {
     this.isloading = true;
     var link = '';
-    this.authService.saveFileInFirebase('Categories/', this.selectedImage).subscribe((e) => {
-      if (e == 100) {
-        link = this.LocalStorage.get('Linkimage')!;
-        this.categorieService.setCategorieToApi(
+
+    const basePath = '/Admin/Categories/' + this.selectedImage.name;
+    const storageRef = this.storage.ref(basePath);
+    const uploadTask = this.storage.upload(basePath, this.selectedImage);
+    uploadTask.snapshotChanges().pipe(
+      finalize(() => {
+        storageRef.getDownloadURL().subscribe((downloadURL : any) => {
+         link = downloadURL;
+         this.categorieService.setCategorieToApi(
           this.applyForm.value.categorie ?? '',
           this.applyForm.value.description ?? '',
           link
@@ -73,15 +81,17 @@ export class AddSupCategoriesComponent implements OnInit {
           this.isloading = false;
           this.messageService.add({ key: 'toast2', severity: 'success', summary: 'Succès', detail: 'Catégorie ajoutée avec succès.' });
           this.isloading = false;
-          this.LocalStorage.remove('Linkimage')!;
           this.router.navigate(['categories'])
+          return;
         }).catch((error) => {
           this.isloading = false;
+          this.router.navigate(['categories'])
           this.messageService.add({ key: 'toast2', severity: 'error', summary: 'Erreur', detail: error.message });
+          return;
         });
-      }
-
-    });
+        });
+      })
+    ).subscribe();
   }
 
 

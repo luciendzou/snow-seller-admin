@@ -10,6 +10,7 @@ import { CommonModule } from '@angular/common';
 import { SkeletonModule } from 'primeng/skeleton';
 import { afterRender, Component, computed, OnInit, signal } from '@angular/core';
 import { AuthService } from '../services/auth.service';
+import { BrowserStorageService } from '../services/browser-storage.service';
 
 @Component({
   selector: 'app-main',
@@ -35,8 +36,15 @@ export class MainComponent implements OnInit {
   isLoading: boolean = true;
   collapsed = signal(false);
   Admin: any;
+  user:any;
 
-  constructor(private router: Router, private authService: AuthService) {
+  constructor(
+    private router: Router,
+    private LocalStorage: BrowserStorageService,
+    private authService: AuthService) {
+
+     this.user = JSON.parse(this.LocalStorage.get('user')!);
+     this.getUsers();
   }
 
   sidenavWidth = computed(() => this.collapsed() ? '85px' : '270px');
@@ -50,14 +58,14 @@ export class MainComponent implements OnInit {
         this.router.navigate(["/verify-email-address"]);
       }
       this.isLoading=false;
-      this.getUsers();
 
     }
 
   }
 
   async getUsers() {
-    this.Admin = await this.authService.getUsersCount(this.authService.uid);
+
+    this.Admin = await this.authService.getUsersCount(this.user.uid);
     this.Logo = this.Admin[0].sigle
  }
 

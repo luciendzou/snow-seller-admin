@@ -18,7 +18,7 @@
               <p-inputIcon styleClass="pi pi-search" />
               <input type="text" pInputText placeholder="Search" />
             </p-iconField>
-            <button class="btn btn-secondary mx-2"><i class="ti ti-refresh"></i></button>
+            <button class="btn btn-secondary mx-2" (click)="getAllMarques()"><i class="ti ti-refresh"></i></button>
 
             <p-button (onClick)="showDialog()" severity="danger" label="Exporter sous"  icon="pi pi-download" class="me-auto" [style]="{'border-radius': '5px'}"/>
 
@@ -39,17 +39,17 @@
               [paginator]="true" [rows]="5" [rowsPerPageOptions]="[5, 10, 20]">
               <ng-template pTemplate="header" let-columns>
                 <tr>
-                  <th>No.</th>
                   <th pSortableColumn="name">Noms <p-sortIcon field="name_provider"></p-sortIcon></th>
-                  <th>Contacts</th>
+                  <th>Images</th>
                   <th>Actions</th>
                 </tr>
               </ng-template>
               <ng-template pTemplate="body" let-fournisseurs let-columns="columns">
                 <tr>
-                  <td>{{ fournisseurs.provider_id }}</td>
-                  <td>{{ fournisseurs.name_provider }}</td>
-                  <td>{{ fournisseurs.phone }}</td>
+                  <td>{{ fournisseurs.nom }}</td>
+                  <td>
+                    <p-avatar image="{{ fournisseurs.image }}" styleClass="mr-2" size="large" shape="circle" />
+                  </td>
                   <td>
                     <button class="btn btn-danger mx-2" (click)="deleteProvider(fournisseurs.provider_id)"><i class="ti ti-trash"></i></button>
                   </td>

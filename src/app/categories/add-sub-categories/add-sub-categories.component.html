@@ -22,22 +22,26 @@
         <div class="col-6 mb-3">
           <div class="flex flex-column gap-2">
             <label for="exampleFormControlInput1" class="form-label">Nom Categorie</label>
-            <input pInputText id="username" class="form-control" aria-describedby="username-help"
-              placeholder="Nom de la categorie" formControlName="categorie" />
+            <input pInputText id="categorie" class="form-control" aria-describedby="username-help"
+              placeholder="Nom de la categorie" formControlName="categorie"/>
           </div>
         </div>
-        <div class="col-6 mb-3">
-          <label for="exampleFormControlInput1" class="form-label">Statut de la Categorie</label>
-          <select class="form-select form-select-lg mt-2 py-2" formControlName="statut">
-            <option selected disabled>Choisir une option</option>
-            <option value="actived">Active</option>
-            <option value="non-actived">Disable</option>
-          </select>
+        <div class="col-12 mb-3">
+          <div class="flex flex-column gap-2">
+            <label for="exampleFormControlInput1" class="form-label">Description</label>
+            <p><textarea rows="2" cols="30" pInputTextarea formControlName="description" class="w-100"></textarea></p>
+          </div>
+        </div>
+        <div class="col-12 mb-5">
+          <label class="form-label">Image</label>
+          <div class="content-img">
+            <input type="file"  accept=".png, .jpg, .jpeg" (change)="onSelectImage($event)"/>
+            <img src="{{link}}" alt="" class="img-cat">
+          </div>
         </div>
         <div class="col-12 text-end">
-          <button class="btn btn-primary py-3" type="submit" [disabled]="isLoading"><i class="ti ti-plus"
-              [hidden]="isLoading"></i> <i class="fa fa-spinner fa-spin me-5" [hidden]="!isLoading"></i>Creer la sous
-            categorie</button>
+          <button class="btn btn-primary py-3" type="submit" [disabled]="isloading==true"><i class="ti ti-plus" [hidden]="isloading==true"></i>
+            <i class="fa fa-spinner fa-spin me-5" [hidden]="isloading==false"></i> Creer la categorie</button>
         </div>
       </div>
     </div>

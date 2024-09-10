@@ -8,13 +8,6 @@ export interface Categories {
   actived?:boolean,
 }
 
-export interface SousCategories {
-  id?:number,
-  cat_id?:number,
-  name_cat?:string,
-  statut?:string
-}
-
 export interface Products {
   product_id?:number,
   souscat_id?:number,

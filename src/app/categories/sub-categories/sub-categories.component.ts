@@ -2,7 +2,6 @@ import { Component, inject, OnInit } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink, RouterLinkActive, RouterModule } from '@angular/router';
 import { MessageService } from 'primeng/api';
 import { Table, TableModule } from 'primeng/table';
-import { SousCategories } from '../../domains/categories';
 import { SouscategoriesService } from '../../services/souscategories.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -15,6 +14,9 @@ import { InputIconModule } from 'primeng/inputicon';
 import { InputTextModule } from 'primeng/inputtext';
 import { SkeletonModule } from 'primeng/skeleton';
 import { ToastModule } from 'primeng/toast';
+import { CategoriesService } from '../../services/categories.service';
+import { AvatarModule } from 'primeng/avatar';
+import { Categories } from '../../domains/categories';
 
 @Component({
   selector: 'app-sub-categories',
@@ -34,7 +36,8 @@ import { ToastModule } from 'primeng/toast';
     TableModule,
     ChipModule,
     DialogModule,
-    SkeletonModule
+    SkeletonModule,
+    AvatarModule,
   ],
   templateUrl: './sub-categories.component.html',
   styleUrl: './sub-categories.component.css',
@@ -45,7 +48,7 @@ export class SubCategoriesComponent implements OnInit {
   route: ActivatedRoute = inject(ActivatedRoute);
 
   Onecategorie!: string;
-  Souscategorie!: SousCategories[];
+  Souscategorie!: Categories[];
   CategorieId!:number;
   loading: boolean = true;
   searchValue: string | undefined;
@@ -55,67 +58,55 @@ export class SubCategoriesComponent implements OnInit {
       this.visible = true;
   }
 
-  constructor(private messageService: MessageService, private sousCategorieService: SouscategoriesService, private router: Router) {
-     this.CategorieId = Number(this.route.snapshot.params['id']);
+  constructor(
+    private categorieService: CategoriesService,
+    private messageService: MessageService,
+    private sousCategorieService: SouscategoriesService,
+    private router: Router) {
+     this.CategorieId = this.route.snapshot.params['id'];
+    this.getAllSousCategories();
   }
 
   ngOnInit() {
+    this.sousCategorieService.getOneCategories(this.CategorieId).then((res: any) => {
+        this.Onecategorie = res.nameCat;
+    });
 
-    this.sousCategorieService.getAllAdminSousCategories(this.CategorieId).subscribe((res: any) => {
-      if (!res.error && res) {
-        if (res.data.length == 0) {
-          this.messageService.add({
-            key: 'toast3',
-            severity: 'error',
-            summary: 'Données vides',
-            detail: 'Désolé, données non recupérées',
-          });
-          this.loading = false;
-        } else {
-        this.Souscategorie = res.data;
+  }
+
+  getAllSousCategories(){
+    this.sousCategorieService.getAllAdminSousCategories(this.CategorieId).then((value) => {
+      if (value.length != 0) {
+        this.loading = false;
         this.messageService.add({ key: 'toast3', severity: 'success', summary: 'Succès', detail: 'Données recupérées avec succès.' });
-        this.loading = false;}
+
+        this.Souscategorie = value;
+
       } else {
-        if (res.error.statut == 'errorstatement') {
-          this.messageService.add({ key: 'toast3', severity: res.error.statut, summary: 'Erreur', detail: res.error.message });
-          this.loading = false;
-
-          return;
-        }
-      }
-
-    });
-
-    this.sousCategorieService.getOneCategories(this.CategorieId).subscribe((res: any) => {
-
-      if (!res.error && res) {
-        this.Onecategorie = res.data[0].name_cat;
-      }
-
-    })
-
-  }
-
-
-  deteleCategorie(CategorieId: any) {
-    this.sousCategorieService.deleteSousCategorie(
-      CategorieId
-    ).subscribe((res: any) => {
-      if (!res.error && res) {
-        this.messageService.add({ key: 'toast3', severity: 'success', summary: 'Succès', detail: 'Catégorie supprimée avec succès.' });
-        window.location.reload()
-      } else {
-        if (res.error.statut == 'error') {
-          this.messageService.add({ key: 'toast3', severity: res.error.statut, summary: 'Erreur', detail: res.error.message });
-          return;
-        }
-        if (res.error.statut == 'errorstatement') {
-          this.messageService.add({ key: 'toast3', severity: res.error.statut, summary: 'Erreur', detail: res.error.message });
-          return;
-        }
+        this.messageService.add({
+          key: 'toast3',
+          severity: 'error',
+          summary: 'Données vides',
+          detail: 'Désolé, données non recupérées',
+        });
+        this.loading = false;
+        return;
       }
     });
   }
+
+
+  async deteleCategorie(CategorieId: any) {
+    await this.categorieService.deleteCategorie(
+       CategorieId
+     ).then((res: any) => {
+         this.messageService.add({ key: 'toast3', severity: 'success', summary: 'Succès', detail: 'Catégorie supprimée avec succès.' });
+         window.location.reload()
+
+     }).catch((error)=>{
+       this.messageService.add({ key: 'toast3', severity: 'error', summary: 'Erreur', detail: error.message });
+     });
+   }
 
 
 

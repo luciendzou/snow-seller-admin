@@ -16,7 +16,7 @@
           <p-inputIcon styleClass="pi pi-search" />
           <input type="text" pInputText placeholder="Search" />
         </p-iconField>
-        <button class="btn btn-secondary mx-2"><i class="ti ti-refresh"></i></button>
+        <button class="btn btn-secondary mx-2" (click)="getSuperAdminInfos()"><i class="ti ti-refresh"></i></button>
         <p-button (onClick)="showDialog()" severity="danger" label="Exporter sous" icon="pi pi-download" class="me-auto"
           [style]="{'border-radius': '5px'}" />
 
