@@ -58,13 +58,11 @@ export class MainComponent implements OnInit {
         this.router.navigate(["/verify-email-address"]);
       }
       this.isLoading=false;
-
     }
 
   }
 
   async getUsers() {
-
     this.Admin = await this.authService.getUsersCount(this.user.uid);
     this.Logo = this.Admin[0].sigle
  }

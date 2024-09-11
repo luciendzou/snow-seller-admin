@@ -9,22 +9,19 @@ export interface Categories {
 }
 
 export interface Products {
-  product_id?:number,
-  souscat_id?:number,
-  provider_id?:number,
-  users_id?:number,
+  product_id?:string,
+  souscat_id?:string,
+  provider_id?:string,
+  users_id?:string,
   title?:string,
-  price?:number,
+  price?:string,
   tags?:string,
   description?:string,
   summary?:string,
-  state?:number,
-  interview?:number,
-  stock?:number,
+  state?:string,
+  interview?:string,
+  stock?:string,
   image?:string,
-  code_product?:string
-  created_at?:string,
-  updated_at?:string,
-  name_provider?:string,
-  name_cat?:string,
+  code_product?:string,
+  created_at?:any,
 }

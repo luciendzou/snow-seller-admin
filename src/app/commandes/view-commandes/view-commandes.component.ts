@@ -14,6 +14,9 @@ import { ToastModule } from 'primeng/toast';
 import { CommandesService } from '../../services/commandes.service';
 import { AvatarModule } from 'primeng/avatar';
 import { Products } from '../../domains/categories';
+import { BrowserStorageService } from '../../services/browser-storage.service';
+import { FournisseursService } from '../../services/fournisseurs.service';
+import { CategoriesService } from '../../services/categories.service';
 
 @Component({
   selector: 'app-view-commandes',
@@ -42,12 +45,21 @@ export class ViewCommandesComponent implements OnInit {
   Products!: Products[];
   visible: boolean = false;
   isLoading: boolean = false;
+  categories:any;
+  marques:any;
   code: any;
+  user:any;
 
   constructor(
     private proServices: CommandesService,
-    private messageService: MessageService
-  ) {}
+    private markServices: FournisseursService,
+    private CatServices: CategoriesService,
+    private messageService: MessageService,
+    private LocalStorage: BrowserStorageService
+  ) {
+
+    this.user = JSON.parse(this.LocalStorage.get('user')!);
+  }
 
   ngOnInit(): void {
     this.code =
@@ -56,40 +68,24 @@ export class ViewCommandesComponent implements OnInit {
       100000 +
       'SE' +
       new Date().getFullYear();
-    localStorage.setItem('code_prod', this.code);
+    this.LocalStorage.set('code_prod', this.code);
 
-    this.proServices.viewStoreProduct().subscribe((res: any) => {
-      if (!res.error && res) {
-        console.log(res.data);
-        if (res.data.length == 0) {
-          this.messageService.add({
-            key: 'toast2',
-            severity: 'error',
-            summary: 'Données vides',
-            detail: 'Désolé, données non recupérées',
-          });
-          this.isLoading = false;
-        } else {
-          this.Products = res.data;
-          this.messageService.add({
-            key: 'toast2',
-            severity: 'success',
-            summary: 'Succès',
-            detail: 'Données recupérées avec succès.',
-          });
-          this.isLoading = false;
-        }
+    this.proServices.viewStoreProduct(this.user.uid).then((value) => {
+      if (value.length > 0) {
+        this.isLoading = false;
+        this.messageService.add({ key: 'toast3', severity: 'success', summary: 'Succès', detail: 'Données recupérées avec succès.' });
+        this.Products = value;
+        this.CatServices.getOneCategories(value[0].souscat_id).then(res=> this.categories=res.nameCat);
+        this.markServices.getOneProvider(value[0].provider_id).then(res=> this.marques=res[0].nom);
       } else {
-        if (res.error.statut == 'errorstatement') {
-          this.messageService.add({
-            key: 'toast2',
-            severity: res.error.statut,
-            summary: 'Erreur',
-            detail: res.error.message,
-          });
-          this.isLoading = false;
-          return;
-        }
+        this.messageService.add({
+          key: 'toast3',
+          severity: 'error',
+          summary: 'Données vides',
+          detail: 'Désolé, données non recupérées',
+        });
+        this.isLoading = false;
+        return;
       }
     });
   }

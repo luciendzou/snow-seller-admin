@@ -1,9 +1,9 @@
 <div class="header-dashboard">
-  <h1 class="">Fournisseurs</h1>
+  <h1 class="">Marques</h1>
   <nav style="--bs-breadcrumb-divider: url(&#34;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10'%3E%3Cpath d='M2.5 0L1 1.5 3.5 4 1 6.5 2.5 8l4-4-4-4z' fill='currentColor'/%3E%3C/svg%3E&#34;);" aria-label="breadcrumb">
     <ol class="breadcrumb">
       <li class="breadcrumb-item"><a routerLink="/">SnowSeller</a></li>
-      <li class="breadcrumb-item active" aria-current="page">Liste des Fournisseurs</li>
+      <li class="breadcrumb-item active" aria-current="page">Liste des Marques</li>
     </ol>
   </nav>
 </div>
@@ -31,7 +31,7 @@
                 <a href="#"><i class="ti ti-file-type-pdf me-3"></i>PDF</a>
               </div>
             </p-dialog>
-            <button class="btn btn-success" [routerLink]="'create'"><i class="ti ti-plus"></i> Ajouter un fournisseurs</button>
+            <button class="btn btn-success" [routerLink]="'create'"><i class="ti ti-plus"></i> Ajouter une marques</button>
           </div>
 
           <div class="col-12 mt-5">
@@ -39,19 +39,19 @@
               [paginator]="true" [rows]="5" [rowsPerPageOptions]="[5, 10, 20]">
               <ng-template pTemplate="header" let-columns>
                 <tr>
-                  <th pSortableColumn="name">Noms <p-sortIcon field="name_provider"></p-sortIcon></th>
                   <th>Images</th>
+                  <th pSortableColumn="name">Noms <p-sortIcon field="name_provider"></p-sortIcon></th>
                   <th>Actions</th>
                 </tr>
               </ng-template>
               <ng-template pTemplate="body" let-fournisseurs let-columns="columns">
                 <tr>
-                  <td>{{ fournisseurs.nom }}</td>
                   <td>
                     <p-avatar image="{{ fournisseurs.image }}" styleClass="mr-2" size="large" shape="circle" />
                   </td>
+                  <td>{{ fournisseurs.nom }}</td>
                   <td>
-                    <button class="btn btn-danger mx-2" (click)="deleteProvider(fournisseurs.provider_id)"><i class="ti ti-trash"></i></button>
+                    <button class="btn btn-danger mx-2" (click)="deleteProvider(fournisseurs.id)"><i class="ti ti-trash"></i></button>
                   </td>
                 </tr>
               </ng-template>

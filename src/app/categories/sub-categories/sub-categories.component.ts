@@ -76,12 +76,11 @@ export class SubCategoriesComponent implements OnInit {
 
   getAllSousCategories(){
     this.sousCategorieService.getAllAdminSousCategories(this.CategorieId).then((value) => {
-      if (value.length != 0) {
+
+      if (value.length > 0) {
         this.loading = false;
         this.messageService.add({ key: 'toast3', severity: 'success', summary: 'Succès', detail: 'Données recupérées avec succès.' });
-
         this.Souscategorie = value;
-
       } else {
         this.messageService.add({
           key: 'toast3',

@@ -5,82 +5,69 @@ import { catchError, map, Observable, of } from 'rxjs';
 import { AuthService } from './auth.service';
 import { Router } from '@angular/router';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
+import { BrowserStorageService } from './browser-storage.service';
+import { Fournisseurs } from '../domains/fournisseurs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class FournisseursService {
 
-  constructor(private http: HttpClient, public afs: AngularFirestore, private authServie: AuthService, private router: Router) {
-    this.authServie.loadUser();
+  user: any;
+
+  constructor(
+    private http: HttpClient,
+    public afs: AngularFirestore,
+    private authServie: AuthService,
+    private LocalStorage: BrowserStorageService,
+    private router: Router
+  ) {
+
+    this.user = JSON.parse(this.LocalStorage.get('user')!);
   }
 
   getAllProviders() {
-    console.log(this.authServie.uid);
-
-    return new Promise<any>((resolve)=>{
+    return new Promise<any>((resolve) => {
       this.afs.collection('Marques').valueChanges()
-      .subscribe(marques => {
-        console.log(marques);
+        .subscribe((marques: any) => {
+          if (marques.length > 0 && marques[0].iduser == this.user.uid) {
+            resolve(marques);
+          }
+        });
+    })
+  }
 
-          resolve(marques);
-      });
+  getOneProvider(id: any) {
+
+    return new Promise<any>((resolve) => {
+      this.afs.collection('Marques', ref => ref.where('id','==',id)).valueChanges()
+        .subscribe((marques: any) => {
+          if (marques.length > 0) {
+            resolve(marques);
+          }
+        });
     })
 
   }
 
 
-  setFournisseurToApi(name_provider: any,phone: any) {
-    const token = localStorage.getItem('userTokenAPI');
+  setFournisseurToApi(name_provider: any, image: any) {
+    const idCat = this.afs.createId();
+    const MarquesData: Fournisseurs = {
+      id: idCat,
+      iduser: this.user.uid,
+      nom: name_provider,
+      image: image
+    };
 
-    if (!this.authServie.user) {
-      this.router.navigate(['dashboard']);
-    }
-    const id = this.authServie.user.users_id!;
-    let URL = URL_SERVICE + 'snowseller/admin/provider/add';
-
-    const headers = new HttpHeaders({
-      'Authorization': `Bearer ${token}`,
-    });
-
-
-    var myFormData = new FormData();
-
-    myFormData.append('users_id', id);
-    myFormData.append('name_provider', name_provider);
-    myFormData.append('phone', phone);
-
-
-
-    return this.http.post(URL, myFormData,{headers}).pipe(
-      map((resp: any) => {
-          return resp;
-      }),
-      catchError((err: any) => {
-        return of(err);
-      })
-    );
+    return this.afs.collection("Marques").doc(idCat).set(JSON.parse(JSON.stringify(MarquesData)));
   }
 
 
 
-  deleteCategorie(id:any) {
-    const token = localStorage.getItem('userTokenAPI');
 
-    let URL = URL_SERVICE + 'snowseller/admin/Provider/delete/'+id;
-
-    const headers = new HttpHeaders({
-      'Authorization': `Bearer ${token}`,
-    });
-
-
-    return this.http.post(URL, {},{headers}).pipe(
-      map((resp: any) => {
-          return resp;
-      }),
-      catchError((err: any) => {
-        return of(err);
-      })
-    );
+  deleteCategorie(id: any): Promise<void> {
+    return this.afs.collection('Marques').doc(id).delete();
   }
+
 }

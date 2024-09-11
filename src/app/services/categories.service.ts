@@ -6,32 +6,44 @@ import { AuthService } from './auth.service';
 import { Router } from '@angular/router';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { Categories } from '../domains/categories';
+import { BrowserStorageService } from './browser-storage.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class CategoriesService {
 
-  constructor(public afs: AngularFirestore, private authServie: AuthService, private router: Router) {
-    this.authServie.loadUser();
+  user: any
+
+  constructor(
+    public afs: AngularFirestore,
+    private authServie: AuthService,
+    private LocalStorage: BrowserStorageService,
+    private router: Router
+  ) {
+
+    this.user = JSON.parse(this.LocalStorage.get('user')!);
+
   }
 
   getAllAdminCategories() {
-    return new Promise<any>((resolve)=>{
-      this.afs.collection('Categories',ref => ref.where('idParent', '==', '').where('iduser', '==', this.authServie.uid)).valueChanges()
-      .subscribe(categories => {
-          resolve(categories);
-      });
+    return new Promise<any>((resolve) => {
+      this.afs.collection('Categories', ref=> ref.where('idParent','==','')).valueChanges()
+        .subscribe((categories: any) => {
+          if (categories.length > 0 && categories[0].iduser == this.user.uid) {
+            resolve(categories);
+          }
+        });
     })
   }
 
-  getOneCategories(id:any) {
-    return new Promise<any>((resolve)=>{
+  getOneCategories(id: any) {
+    return new Promise<any>((resolve) => {
 
       this.afs.collection('Categories').doc(id).valueChanges()
-      .subscribe(categories => {
+        .subscribe(categories => {
           resolve(categories);
-      });
+        });
     })
 
   }
@@ -42,7 +54,7 @@ export class CategoriesService {
     const idCat = this.afs.createId();
     const CategorieData: Categories = {
       id: idCat,
-      iduser: this.authServie.uid,
+      iduser: this.user.uid,
       nameCat: categorie,
       description_cat: description,
       imgCat: image,
@@ -54,7 +66,7 @@ export class CategoriesService {
   }
 
 
-  updateCategorieToApi(categorie: string, description: string, statut: boolean,  image: any, id:any) {
+  updateCategorieToApi(categorie: string, description: string, statut: boolean, image: any, id: any) {
     const CategorieData: Categories = {
       nameCat: categorie,
       description_cat: description,
@@ -67,7 +79,7 @@ export class CategoriesService {
 
 
 
-  deleteCategorie(id:any): Promise<void> {
+  deleteCategorie(id: any): Promise<void> {
     return this.afs.collection('Categories').doc(id).delete();
   }
 }

@@ -63,6 +63,9 @@ export class AddInformationsComponent {
   ) {
     this.superadmin = new SuperAdmin();
     this.user = JSON.parse(this.LocalStorage.get('user')!);
+  }
+
+  ngOnInit(): void {
     this.authService.getUsersCount(this.user.uid);
   }
 

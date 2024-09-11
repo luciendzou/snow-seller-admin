@@ -10,6 +10,7 @@ import { ToastModule } from 'primeng/toast';
 import { ChipsModule } from 'primeng/chips';
 import { CommandesService } from '../../services/commandes.service';
 import { ActivatedRoute, Router } from '@angular/router';
+import { BrowserStorageService } from '../../services/browser-storage.service';
 
 @Component({
   selector: 'app-add-commande',
@@ -34,17 +35,20 @@ export class AddCommandeComponent implements OnInit {
     fournisseur: new FormControl(''),
     description: new FormControl(''),
     summary: new FormControl(''),
-    values:new FormControl('')
+    values: new FormControl(''),
+    monnaie: new FormControl('')
   });
 
-  isLoading:boolean = false;
+  isLoading: boolean = false;
 
   SousCategories!: any[];
   Forunisseurs!: any[];
   iduser: any;
   selectedImage: any;
   link: any;
-  code_prod:any;
+  code_prod: any;
+  user: any;
+  monnaieData: any;
 
 
   route: ActivatedRoute = inject(ActivatedRoute);
@@ -53,61 +57,106 @@ export class AddCommandeComponent implements OnInit {
     private catService: SouscategoriesService,
     private fourServices: FournisseursService,
     private userService: AuthService,
-    private commandes : CommandesService,
-    private messageService : MessageService,
-    private router : Router,
-  ) {}
+    private commandes: CommandesService,
+    private messageService: MessageService,
+    private router: Router,
+    private LocalStorage: BrowserStorageService
+  ) {
+    this.user = JSON.parse(this.LocalStorage.get('user')!);
+    this.LocalStorage.remove('imageLink');
+  }
 
   ngOnInit(): void {
-    this.code_prod = localStorage.getItem("code_prod");
-
-    this.iduser = this.userService.user.users_id;
-
-
-
-
+    this.monnaieData = [{ 'signe': 'XAF', 'name': 'Franc CFA', }, { 'signe': '$', 'name': 'Dollars', },{ 'signe': '€', 'name': 'Euro', }]
+    this.code_prod = this.LocalStorage.get("code_prod");
+    this.iduser = this.user.uid;
+    this.getFournisseursList()
+    this.CategoriesList()
   }
 
-  getFournisseursList(data: any) {
-    this.Forunisseurs = data;
+  getFournisseursList() {
+    this.fourServices.getAllProviders().then((value) => {
+      this.Forunisseurs = value;
+    })
   }
 
-  CategoriesList(data: any) {
-    this.SousCategories = data;
+  CategoriesList() {
+    this.catService.getAllSousCategories().then((value) => {
+      this.SousCategories = value;
+    })
   }
 
 
   submitApplication() {
-    this.commandes.storeCommandeData(
-      this.applyForm.value.categorie ?? '',
-      this.applyForm.value.fournisseur ?? '',
-      this.applyForm.value.title ?? '',
-      this.applyForm.value.price ?? '',
-      this.applyForm.value.values ?? '',
-      this.applyForm.value.description ?? '',
-      this.applyForm.value.summary ?? '',
-      this.applyForm.value.stock ?? '',
-      this.selectedImage,
-      this.code_prod
-    ).subscribe((res:any)=>{
-
-      if (!res.error && res) {
-        this.messageService.add({ key: 'toast2', severity: 'success', summary: 'Succès', detail: 'Catégorie ajoutée avec succès.' });
-        this.isLoading=false;
-        this.router.navigate(['approv-stock'])
-      } else {
-        if (res.error.statut == 'error') {
-          this.messageService.add({ key: 'toast2', severity: res.error.statut, summary: 'Erreur', detail: res.error.message });
-          this.isLoading=false;
-          return;
-        }
-        if (res.error.statut == 'errorstatement') {
-          this.isLoading=false;
-          this.messageService.add({ key: 'toast2', severity: res.error.statut, summary: 'Erreur', detail: res.error.message });
-          return;
-        }
+    this.isLoading = true;
+    var linker = this.LocalStorage.get('imageLink');
+    this.userService.saveFileInFirebase('Marques/', this.selectedImage);
+    linker = this.LocalStorage.get('imageLink');
+    if (linker == '' || linker == null) {
+      linker = this.LocalStorage.get('imageLink');
+      console.log(linker);
+      if (linker == '' || linker == null) {
+        this.isLoading = false;
+        return;
       }
-    })
+      this.commandes.storeCommandeData(
+        this.applyForm.value.categorie ?? '',
+        this.applyForm.value.fournisseur ?? '',
+        this.applyForm.value.title ?? '',
+        this.applyForm.value.price ?? '',
+        this.applyForm.value.values ?? '',
+        this.applyForm.value.description ?? '',
+        this.applyForm.value.summary ?? '',
+        this.applyForm.value.stock ?? '',
+        linker,
+        this.code_prod,
+        this.user.uid,
+        this.applyForm.value.monnaie ?? '',
+      ).then((e) => {
+        this.isLoading = false;
+        this.messageService.add({ key: 'toast2', severity: 'success', summary: 'Succès', detail: 'Le produit a été ajouté avec succès.' });
+
+        this.LocalStorage.remove('imageLink')
+        this.router.navigate(['approv-stock'])
+        return;
+      }).catch((error) => {
+        this.isLoading = false;
+        this.LocalStorage.remove('imageLink')
+        this.router.navigate(['approv-stock'])
+        this.messageService.add({ key: 'toast2', severity: 'error', summary: 'Erreur', detail: error.message });
+        return;
+      });
+
+    } else {
+      linker = this.LocalStorage.get('imageLink');
+      this.commandes.storeCommandeData(
+        this.applyForm.value.categorie ?? '',
+        this.applyForm.value.fournisseur ?? '',
+        this.applyForm.value.title ?? '',
+        this.applyForm.value.price ?? '',
+        this.applyForm.value.values ?? '',
+        this.applyForm.value.description ?? '',
+        this.applyForm.value.summary ?? '',
+        this.applyForm.value.stock ?? '',
+        linker,
+        this.code_prod,
+        this.user.uid,
+        this.applyForm.value.monnaie ?? '',
+      ).then((e) => {
+        this.isLoading = false;
+        this.messageService.add({ key: 'toast2', severity: 'success', summary: 'Succès', detail: 'Le produit a été ajouté avec succès.' });
+
+        this.LocalStorage.remove('imageLink')
+        this.router.navigate(['providers-stock'])
+        return;
+      }).catch((error) => {
+        this.isLoading = false;
+        this.LocalStorage.remove('imageLink')
+        this.router.navigate(['providers-stock'])
+        this.messageService.add({ key: 'toast2', severity: 'error', summary: 'Erreur', detail: error.message });
+        return;
+      });
+    }
   }
 
   onSelectImage(event: any) {

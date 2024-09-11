@@ -78,37 +78,14 @@ export class ViewApprovComponent implements OnInit {
     });
   }
 
-  deleteProvider(id: any) {
-    this.providerService.deleteCategorie(id).subscribe((res: any) => {
-      if (!res.error && res) {
-        this.messageService.add({
-          key: 'toast3',
-          severity: 'success',
-          summary: 'Succès',
-          detail: res.message,
-        });
+  async deleteProvider(id: any) {
+    await this.providerService.deleteCategorie(id).then((res: any) => {
+         this.messageService.add({ key: 'toast3', severity: 'success', summary: 'Succès', detail: 'Catégorie supprimée avec succès.' });
+         window.location.reload()
 
-        window.location.reload();
-      } else {
-        if (res.error.statut == 'error') {
-          this.messageService.add({
-            key: 'toast3',
-            severity: res.error.statut,
-            summary: 'Erreur',
-            detail: res.error.message,
-          });
-          return;
-        }
-        if (res.error.statut == 'errorstatement') {
-          this.messageService.add({
-            key: 'toast3',
-            severity: res.error.statut,
-            summary: 'Erreur',
-            detail: res.error.message,
-          });
-          return;
-        }
-      }
-    });
-  }
+     }).catch((error)=>{
+       this.messageService.add({ key: 'toast3', severity: 'error', summary: 'Erreur', detail: error.message });
+     });
+   }
+
 }

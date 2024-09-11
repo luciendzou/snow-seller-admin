@@ -11,6 +11,7 @@ import { MessageService } from 'primeng/api';
 import { SkeletonModule } from 'primeng/skeleton';
 import { AuthService } from '../services/auth.service';
 import { Router } from '@angular/router';
+import { BrowserStorageService } from '../services/browser-storage.service';
 
 @Component({
   selector: 'app-menubar',
@@ -35,8 +36,14 @@ export class MenubarComponent implements OnInit {
   UserData: any;
   nameUser: string = '';
   label:any;
+  user:any;
 
-  constructor(private router: Router, private messageService: MessageService,) { }
+  constructor(
+    private router: Router,
+    private messageService: MessageService,
+    private LocalStorage: BrowserStorageService) {
+    this.user = JSON.parse(this.LocalStorage.get('user')!);
+  }
 
   ngOnInit(): void {
 
@@ -49,7 +56,7 @@ export class MenubarComponent implements OnInit {
   }
 
   async getSuperAdminInfos(){
-      this.UserData = await this.authService.getUsersCount(this.authService.uid);
+      this.UserData = await this.authService.getUsersCount(this.user.uid);
       this.nameUser = this.UserData[0].email;
       this.label = this.nameUser.charAt(0)
    }

@@ -5,6 +5,8 @@ import { AuthService } from './auth.service';
 import { Router } from '@angular/router';
 import { URL_SERVICE } from '../../config/config';
 import { catchError, map, Observable, of } from 'rxjs';
+import { AngularFirestore } from '@angular/fire/compat/firestore';
+import { Products } from '../domains/categories';
 
 @Injectable({
   providedIn: 'root',
@@ -13,32 +15,22 @@ export class CommandesService {
   constructor(
     private http: HttpClient,
     private authServie: AuthService,
-    private router: Router
-  ) {}
+    private router: Router,
+    public afs: AngularFirestore,
+  ) { }
 
 
-  viewStoreProduct(): Observable<any> {
-    const token = localStorage.getItem('userTokenAPI');
-    if (!this.authServie.user) {
-      this.router.navigate(['dashboard']);
-    }
-    const id = this.authServie.user.users_id!;
-    let URL = URL_SERVICE + 'snowseller/admin/products/view/' + id;
-    if (!token) {
-      return of(null);
-    }
-    const headers = new HttpHeaders({
-      'Authorization': `Bearer ${token}`,
-    });
-
-    return this.http.get<any>(URL, { headers }).pipe(
-      map((resp: any) => {
-        return resp;
-      }),
-      catchError((err: any) => {
-        return of(err);
-      })
-    );;
+  viewStoreProduct(id: any) {
+    return new Promise<any>((resolve) => {
+      this.afs.collection('Products').valueChanges()
+        .subscribe((produits: any) => {
+          if (produits.length > 0 && produits[0].iduser == id) {
+            resolve(produits);
+          } else {
+            resolve(produits);
+          }
+        });
+    })
 
   }
 
@@ -53,44 +45,29 @@ export class CommandesService {
     summary: any,
     stock: any,
     image: any,
-    code_product: any
+    code_product: any,
+    iduser: any,
+    monnaie: any,
   ) {
-    const token = localStorage.getItem('userTokenAPI');
+    const idCat = this.afs.createId();
+    const ProductsData: Products = {
+      product_id: idCat,
+      souscat_id: souscat_id,
+      provider_id: provider_id,
+      users_id: iduser,
+      title: title,
+      price: price + ' ' + monnaie,
+      tags: tags,
+      description: description,
+      summary: summary,
+      state: '',
+      interview: '',
+      stock: stock,
+      image: image,
+      code_product: code_product,
+      created_at: Date.now(),
+    };
 
-    if (!this.authServie.user) {
-      this.router.navigate(['dashboard']);
-    }
-    const id = this.authServie.user.users_id!;
-    let URL = URL_SERVICE + 'snowseller/admin/product/add';
-
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${token}`,
-    });
-    headers.append('Content-Type', 'multipart/form-data');
-
-    var myFormData = new FormData();
-
-    myFormData.append('souscat_id', souscat_id);
-    myFormData.append('provider_id', provider_id);
-    myFormData.append('users_id', id);
-    myFormData.append('title', title);
-    myFormData.append('price', price);
-    myFormData.append('tags', tags);
-    myFormData.append('description', description);
-    myFormData.append('summary', summary);
-    myFormData.append('state', '0');
-    myFormData.append('interview', '0');
-    myFormData.append('stock', stock);
-    myFormData.append('image', image);
-    myFormData.append('code_product', code_product);
-
-    return this.http.post(URL, myFormData, { headers }).pipe(
-      map((resp: any) => {
-        return resp;
-      }),
-      catchError((err: any) => {
-        return of(err);
-      })
-    );
+    return this.afs.collection("Products").doc(idCat).set(JSON.parse(JSON.stringify(ProductsData)));
   }
 }

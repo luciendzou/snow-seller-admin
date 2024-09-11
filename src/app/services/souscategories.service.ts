@@ -6,43 +6,66 @@ import { AuthService } from './auth.service';
 import { Router } from '@angular/router';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { Categories } from '../domains/categories';
+import { BrowserStorageService } from './browser-storage.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class SouscategoriesService {
 
+  user: any;
 
-  constructor(public afs: AngularFirestore,private authServie: AuthService, private router: Router) {
-    this.authServie.loadUser();
+  constructor(
+    public afs: AngularFirestore,
+    private authServie: AuthService,
+    private LocalStorage: BrowserStorageService,
+    private router: Router
+  ) {
+
+    this.user = JSON.parse(this.LocalStorage.get('user')!);
   }
 
 
-  getAllAdminSousCategories(id:any) {
-
-    return new Promise<any>((resolve)=>{
-      this.afs.collection('Categories',ref => ref.where('idParent', '==', id).where('iduser', '==', this.authServie.uid)).valueChanges()
-      .subscribe(categories => {
-          resolve(categories);
-      });
+  getAllAdminSousCategories(id: any) {
+    return new Promise<any>((resolve) => {
+      this.afs.collection('Categories', ref=> ref.where('idParent','==',id)).valueChanges()
+        .subscribe((categories: any) => {
+          if (categories.length > 0 && categories[0].iduser == this.user.uid) {
+            resolve(categories);
+          }else{
+            resolve(categories);
+          }
+        });
     })
-
   }
 
-  getOneCategories(id:any) {
-    return new Promise<any>((resolve)=>{
+  getAllSousCategories() {
+    return new Promise<any>((resolve) => {
+      this.afs.collection('Categories', ref=> ref.where('idParent','!=','')).valueChanges()
+        .subscribe((categories: any) => {
+          if (categories.length > 0 && categories[0].iduser == this.user.uid) {
+            resolve(categories);
+          }else{
+            resolve(categories);
+          }
+        });
+    })
+  }
+
+  getOneCategories(id: any) {
+    return new Promise<any>((resolve) => {
       this.afs.collection('Categories').doc(id).valueChanges()
-      .subscribe(categories => {
+        .subscribe(categories => {
           resolve(categories);
-      });
+        });
     })
   }
 
-  setCategorieToApi(categorie: any, description: any, image: any, idParent:any) {
+  setCategorieToApi(categorie: any, description: any, image: any, idParent: any) {
     const idCat = this.afs.createId();
     const CategorieData: Categories = {
       id: idCat,
-      iduser: this.authServie.uid,
+      iduser: this.user.uid,
       nameCat: categorie,
       description_cat: description,
       imgCat: image,

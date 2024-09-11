@@ -27,7 +27,7 @@ export class AuthService {
     this.loadUser();
   }
 
-  loadUser(){
+  loadUser() {
     this.afAuth.authState.subscribe((user) => {
       if (user) {
         this.userData = user;
@@ -48,8 +48,8 @@ export class AuthService {
     uploadTask.snapshotChanges().pipe(
       finalize(() => {
         storageRef.getDownloadURL().subscribe(downloadURL => {
-        const link = downloadURL;
-        this.LocalStorage.set('imageLink', link);
+          const link = downloadURL;
+          this.LocalStorage.set('imageLink', link);
         });
       })
     ).subscribe();
@@ -121,7 +121,6 @@ export class AuthService {
   // Returns true when user is looged in and email is verified
   get isLoggedIn(): boolean {
     const user = JSON.parse(this.LocalStorage.get('user')!);
-
     return user !== null && user.emailVerified !== false ? true : false;
   }
 
@@ -157,16 +156,12 @@ export class AuthService {
 
 
   getUsersCount(userId: any,) {
-    console.log(userId);
-
     return new Promise<any>((resolve) => {
-      this.afs.collection('Admin',ref => ref.where('uid', '==', userId)).valueChanges()
-        .subscribe(users => {
-          console.log(users);
-          if (users.length > 0) {
+      this.afs.collection('Admin').valueChanges()
+        .subscribe((users: any) => {
+          if (users.length > 0 && users[0].uid == userId) {
             resolve(users);
-            this.router.navigate(['dashboard']);
-          }else{
+          } else {
             this.router.navigate(['verify-email-address']);
           }
         });

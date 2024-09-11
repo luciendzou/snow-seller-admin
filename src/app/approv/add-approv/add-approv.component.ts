@@ -7,6 +7,10 @@ import { ToastModule } from 'primeng/toast';
 import { FournisseursService } from '../../services/fournisseurs.service';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { finalize } from 'rxjs';
+import { AngularFireStorage } from '@angular/fire/compat/storage';
+import { BrowserStorageService } from '../../services/browser-storage.service';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-add-approv',
@@ -25,56 +29,94 @@ import { Router } from '@angular/router';
 export class AddApprovComponent {
   applyForm = new FormGroup({
     provider: new FormControl(''),
-    phone: new FormControl(''),
   });
 
-  isLoading : boolean = false;
+  selectedImage: any;
+  link: any;
+  linkers: any;
+  isLoading: boolean = false;
+  label:any;
 
   constructor(
+    private authService: AuthService,
     private providerService: FournisseursService,
     private messageService: MessageService,
-    private router: Router
-  ) {}
+    private router: Router,
+    private storage: AngularFireStorage,
+    private LocalStorage: BrowserStorageService
+  ) {
+    //this.linker = this.LocalStorage.get('imageLink');
+    this.LocalStorage.remove('imageLink');
+    console.log(this.LocalStorage.get('imageLink'));
+  }
+
+  ngOnInit(): void {
+    this.label='Commencer'
+  }
 
   submitApplication() {
+    this.label='Ajouter une marques'
     this.isLoading = true;
-    this.providerService
-      .setFournisseurToApi(
-        this.applyForm.value.provider ?? '',
-        this.applyForm.value.phone ?? ''
-      )
-      .subscribe((res: any) => {
-        if (!res.error && res) {
-          this.messageService.add({
-            key: 'toast2',
-            severity: 'success',
-            summary: res.statut,
-            detail: res.message,
-          });
+    var linker = this.LocalStorage.get('imageLink');
+    this.authService.saveFileInFirebase('Marques/', this.selectedImage);
+    linker = this.LocalStorage.get('imageLink');
+    if (linker == '' || linker == null) {
+      linker = this.LocalStorage.get('imageLink');
+      if (linker == '' || linker == null) {
+        this.isLoading = false;
+        return;
+      }
+      this.providerService
+        .setFournisseurToApi(
+          this.applyForm.value.provider ?? '',
+          linker
+        ).then((e) => {
           this.isLoading = false;
-          this.router.navigate(['providers-stock']);
-        } else {
-          if (res.error.statut == 'error') {
-            this.messageService.add({
-              key: 'toast2',
-              severity: res.error.statut,
-              summary: 'Erreur',
-              detail: res.error.message,
-            });
-            this.isLoading = false;
-            return;
-          }
-          if (res.error.statut == 'errorstatement') {
-            this.messageService.add({
-              key: 'toast2',
-              severity: res.error.statut,
-              summary: 'Erreur',
-              detail: res.error.message,
-            });
-            this.isLoading = false;
-            return;
-          }
-        }
-      });
+          this.messageService.add({ key: 'toast2', severity: 'success', summary: 'Succès', detail: 'La marque a été ajoutée avec succès.' });
+
+          this.LocalStorage.remove('imageLink')
+          this.router.navigate(['providers-stock'])
+          return;
+        }).catch((error) => {
+          this.isLoading = false;
+          this.LocalStorage.remove('imageLink')
+          this.router.navigate(['providers-stock'])
+          this.messageService.add({ key: 'toast2', severity: 'error', summary: 'Erreur', detail: error.message });
+          return;
+        });
+    } else {
+      linker = this.LocalStorage.get('imageLink');
+
+      this.providerService
+        .setFournisseurToApi(
+          this.applyForm.value.provider ?? '',
+          linker
+        ).then((e) => {
+          this.isLoading = false;
+          this.messageService.add({ key: 'toast2', severity: 'success', summary: 'Succès', detail: 'La marque a été ajoutée avec succès.' });
+
+          this.LocalStorage.remove('imageLink')
+          this.router.navigate(['providers-stock'])
+          return;
+        }).catch((error) => {
+          this.isLoading = false;
+          this.LocalStorage.remove('imageLink')
+          this.router.navigate(['providers-stock'])
+          this.messageService.add({ key: 'toast2', severity: 'error', summary: 'Erreur', detail: error.message });
+          return;
+        });
+    }
+  }
+
+
+
+  onSelectImage(event: any) {
+    this.selectedImage = event.srcElement.files[0];
+
+    const reader = new FileReader(); reader.onload = e => {
+      return this.link = reader.result;
+    };
+    reader.readAsDataURL(this.selectedImage);
+
   }
 }

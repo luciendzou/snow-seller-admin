@@ -54,7 +54,13 @@ export class AddSupCategoriesComponent implements OnInit {
   });
 
 
-  constructor( private storage: AngularFireStorage, private LocalStorage: BrowserStorageService, private router: Router, private messageService: MessageService, private authService: AuthService, private categorieService: CategoriesService) { }
+  constructor(
+    private storage: AngularFireStorage,
+    private LocalStorage: BrowserStorageService,
+    private router: Router,
+    private messageService: MessageService,
+    private authService: AuthService,
+    private categorieService: CategoriesService) { }
 
   ngOnInit() {
 
@@ -71,24 +77,24 @@ export class AddSupCategoriesComponent implements OnInit {
     const uploadTask = this.storage.upload(basePath, this.selectedImage);
     uploadTask.snapshotChanges().pipe(
       finalize(() => {
-        storageRef.getDownloadURL().subscribe((downloadURL : any) => {
-         link = downloadURL;
-         this.categorieService.setCategorieToApi(
-          this.applyForm.value.categorie ?? '',
-          this.applyForm.value.description ?? '',
-          link
-        ).then((e) => {
-          this.isloading = false;
-          this.messageService.add({ key: 'toast2', severity: 'success', summary: 'Succès', detail: 'Catégorie ajoutée avec succès.' });
-          this.isloading = false;
-          this.router.navigate(['categories'])
-          return;
-        }).catch((error) => {
-          this.isloading = false;
-          this.router.navigate(['categories'])
-          this.messageService.add({ key: 'toast2', severity: 'error', summary: 'Erreur', detail: error.message });
-          return;
-        });
+        storageRef.getDownloadURL().subscribe((downloadURL: any) => {
+          link = downloadURL;
+          this.categorieService.setCategorieToApi(
+            this.applyForm.value.categorie ?? '',
+            this.applyForm.value.description ?? '',
+            link
+          ).then((e) => {
+            this.isloading = false;
+            this.messageService.add({ key: 'toast2', severity: 'success', summary: 'Succès', detail: 'Catégorie ajoutée avec succès.' });
+            this.isloading = false;
+            this.router.navigate(['categories'])
+            return;
+          }).catch((error) => {
+            this.isloading = false;
+            this.router.navigate(['categories'])
+            this.messageService.add({ key: 'toast2', severity: 'error', summary: 'Erreur', detail: error.message });
+            return;
+          });
         });
       })
     ).subscribe();
